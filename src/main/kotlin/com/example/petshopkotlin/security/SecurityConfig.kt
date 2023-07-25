@@ -13,40 +13,40 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.security.web.SecurityFilterChain
 
 @Configuration
-    @EnableWebSecurity
-    @EnableGlobalMethodSecurity(securedEnabled = true, jsr250Enabled = true)
-    class SecurityConfig(val userDetailsService: UserDetailsService) {
-        @Bean
-        @Throws(Exception::class)
-        fun customAuthenticationManager(http: HttpSecurity): AuthenticationManager {
-            val authenticationManagerBuilder: AuthenticationManagerBuilder = http.getSharedObject(
-                AuthenticationManagerBuilder::class.java
-            )
-            authenticationManagerBuilder.userDetailsService(userDetailsService)
-                .passwordEncoder(bCryptPasswordEncoder())
-            return authenticationManagerBuilder.build()
-        }
-        @Bean
-        fun bCryptPasswordEncoder(): BCryptPasswordEncoder {
-            return BCryptPasswordEncoder()
-        }
-
-        @Bean
-        @Throws(Exception::class)
-        fun filterChain(http: HttpSecurity): SecurityFilterChain {
-            http.csrf()
-                .disable()
-                .authorizeRequests()
-                .and()
-                .httpBasic()
-                .and()
-                .authorizeRequests()
-                .anyRequest()
-                .permitAll()
-                .and()
-                .sessionManagement()
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-            return http.build()
-        }
+@EnableWebSecurity
+@EnableGlobalMethodSecurity(securedEnabled = true, jsr250Enabled = true)
+class SecurityConfig(val userDetailsService: UserDetailsService) {
+    @Bean
+    @Throws(Exception::class)
+    fun customAuthenticationManager(http: HttpSecurity): AuthenticationManager {
+        val authenticationManagerBuilder: AuthenticationManagerBuilder = http.getSharedObject(
+            AuthenticationManagerBuilder::class.java,
+        )
+        authenticationManagerBuilder.userDetailsService(userDetailsService)
+            .passwordEncoder(bCryptPasswordEncoder())
+        return authenticationManagerBuilder.build()
     }
 
+    @Bean
+    fun bCryptPasswordEncoder(): BCryptPasswordEncoder {
+        return BCryptPasswordEncoder()
+    }
+
+    @Bean
+    @Throws(Exception::class)
+    fun filterChain(http: HttpSecurity): SecurityFilterChain {
+        http.csrf()
+            .disable()
+            .authorizeRequests()
+            .and()
+            .httpBasic()
+            .and()
+            .authorizeRequests()
+            .anyRequest()
+            .permitAll()
+            .and()
+            .sessionManagement()
+            .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+        return http.build()
+    }
+}

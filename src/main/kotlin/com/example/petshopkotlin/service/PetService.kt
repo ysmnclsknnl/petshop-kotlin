@@ -1,4 +1,4 @@
-package com.example.petshopkotlin.petservice
+package com.example.petshopkotlin.service
 
 import com.example.petshopkotlin.collection.Pet
 import com.example.petshopkotlin.collection.PetType

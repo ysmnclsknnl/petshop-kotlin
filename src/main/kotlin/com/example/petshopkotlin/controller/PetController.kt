@@ -1,7 +1,7 @@
 package com.example.petshopkotlin.controller
 
 import com.example.petshopkotlin.collection.Pet
-import com.example.petshopkotlin.petservice.PetService
+import com.example.petshopkotlin.service.PetService
 import org.bson.types.ObjectId
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
