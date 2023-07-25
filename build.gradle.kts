@@ -25,7 +25,8 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     developmentOnly("org.springframework.boot:spring-boot-devtools")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
-    implementation ("net.datafaker:datafaker:2.0.1")
+    implementation("org.springframework.boot:spring-boot-starter-security")
+    implementation("net.datafaker:datafaker:2.0.1")
 }
 
 tasks.withType<KotlinCompile> {
