@@ -1,22 +1,24 @@
 
 package com.example.petshopkotlin.collection
 
-import org.springframework.data.annotation.Id
+import org.bson.types.ObjectId
 import org.springframework.data.mongodb.core.mapping.Document
+import org.springframework.data.mongodb.core.mapping.MongoId
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.userdetails.UserDetails
 
 @Document(collection = "user")
 data class User(
-    @Id
+    @MongoId
+    private val id: ObjectId = ObjectId(),
     val userName: String,
-    val password: String,
+    private val password: String,
     val role: Role,
 ) : UserDetails {
     override fun getAuthorities() = listOf(SimpleGrantedAuthority("ROLE_$role"))
-    override fun getPassword() = password
-
     override fun getUsername() = userName
+
+    override fun getPassword() = password
 
     override fun isAccountNonExpired() = true
 

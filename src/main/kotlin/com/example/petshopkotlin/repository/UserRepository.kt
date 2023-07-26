@@ -7,6 +7,7 @@ import org.springframework.data.mongodb.repository.Query
 
 interface UserRepository : MongoRepository<User?, ObjectId?> {
     fun existsByUserName(username: String?): Boolean
+
     @Query("{userName:'?0'}")
-    fun findUserByUsername(username: String?): User?
+    fun findUserByUsername(userName: String?): User?
 }

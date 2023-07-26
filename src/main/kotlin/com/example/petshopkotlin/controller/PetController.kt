@@ -2,6 +2,7 @@ package com.example.petshopkotlin.controller
 
 import com.example.petshopkotlin.collection.Pet
 import com.example.petshopkotlin.service.PetService
+import jakarta.annotation.security.RolesAllowed
 import org.bson.types.ObjectId
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
@@ -12,7 +13,7 @@ import org.springframework.web.server.ResponseStatusException
 @RestController
 @RequestMapping("/api/pets")
 class PetController(@Autowired val petService: PetService) {
-
+    @RolesAllowed("ROLE_ADMIN", "ROLE_CUSTOMER")
     @GetMapping
     fun getPets(): ResponseEntity<List<Pet?>> {
         try {
@@ -22,6 +23,7 @@ class PetController(@Autowired val petService: PetService) {
         }
     }
 
+    @RolesAllowed("ROLE_ADMIN")
     @PostMapping
     fun createPet(@RequestBody pet: Pet): ResponseEntity<ObjectId> {
         try {
@@ -34,6 +36,7 @@ class PetController(@Autowired val petService: PetService) {
         }
     }
 
+    @RolesAllowed("ROLE_CUSTOMER")
     @PatchMapping("/{id}")
     fun adoptPet(@PathVariable id: ObjectId): ResponseEntity<String> {
         try {

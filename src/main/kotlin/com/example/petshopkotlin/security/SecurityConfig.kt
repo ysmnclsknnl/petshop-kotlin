@@ -35,7 +35,8 @@ class SecurityConfig(val userDetailsService: UserDetailsService) {
     @Bean
     @Throws(Exception::class)
     fun filterChain(http: HttpSecurity): SecurityFilterChain {
-        http.csrf()
+        http
+            .csrf()
             .disable()
             .authorizeRequests()
             .and()
