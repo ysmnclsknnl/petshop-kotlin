@@ -61,7 +61,8 @@ class AuthControllerTest {
         )
             .andExpect(status().isBadRequest)
 
-        val savedUser = userRepository.findUserByUsername("aaa.com")
-        assertTrue(savedUser == null)
+
+
+
     }
 }

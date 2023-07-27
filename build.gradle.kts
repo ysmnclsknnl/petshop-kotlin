@@ -25,6 +25,7 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     developmentOnly("org.springframework.boot:spring-boot-devtools")
     implementation("org.springframework.boot:spring-boot-starter-security")
+    testImplementation("org.springframework.security:spring-security-test:6.1.2")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     val testContainers = "1.18.1"
     testImplementation("org.springframework.boot:spring-boot-starter-test")
