@@ -32,40 +32,28 @@ class PetControllerTest {
         petRepository.deleteAll()
     }
 
-    @WithMockUser(username = "user1@abc.com", password = "password", roles = ["ADMIN"])
-        @Test
-        fun givenAdminUser_whenCreatePet_thenSuccess() {
-            mockMvc.perform(
-                post("/api/pets")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content("{\n" +
-                            "    \"name\": \"hoiii\",\n" +
-                            "    \"description\": \"lorem ipsum amed akdkdnddndsfsdfsdfsdfsdfdfdfdfg\",\n" +
-                            "    \"age\": 0,\n" +
-                            "    \"type\": \"CAT\",\n" +
-                            "    \"photoLink\": \"wwww.image.com\"\n" +
-                            "}"
-            )
-            )
-                .andExpect(status().isOk)
-        }
-
-    @WithMockUser(username = "user1@abc.com", password = "password", roles = ["CUSTOMER"])
     @Test
-    fun givenOtherRolesExceptAdmin_whenCreatePet_thenUnauthorized() {
+    fun givenUnauthenticatedUser_whenGetPet_thenUnauthorized() {
+        val pets = listOf(
+            Pet(
+                name = "Tom",
+                description = "Fast cat. Loves running behind Jerry",
+                age = 2,
+                type = PetType.CAT,
+                photoLink = "www.hoicat.com"
+            ),
+            Pet(
+                name = "Cotton",
+                description = "Cute dog. Likes to play fetch",
+                age = 3,
+                type = PetType.DOG,
+                photoLink = "www.hoidog.com"
+            ),
+        ).also(petRepository::saveAll)
+
         mockMvc.perform(
-            post("/api/pets")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("{\n" +
-                        "    \"name\": \"hoiii\",\n" +
-                        "    \"description\": \"lorem ipsum amed akdkdnddndsfsdfsdfsdfsdfdfdfdfg\",\n" +
-                        "    \"age\": 0,\n" +
-                        "    \"type\": \"CAT\",\n" +
-                        "    \"photoLink\": \"wwww.image.com\"\n" +
-                        "}"
-                )
-        )
-            .andExpect(status().isForbidden)
+            get("/api/pets"))
+            .andExpect(status().isUnauthorized)
     }
 
     @WithMockUser(username = "user1@abc.com", password = "password", roles = ["ADMIN"])
@@ -86,9 +74,7 @@ class PetControllerTest {
                 type = PetType.DOG,
                 photoLink = "www.hoidog.com"
             ),
-        )
-
-        val savedPets = petRepository.saveAll(pets)
+        ).also(petRepository::saveAll)
 
         mockMvc.perform(
             get("/api/pets"))
@@ -117,9 +103,7 @@ class PetControllerTest {
                 type = PetType.DOG,
                 photoLink = "www.hoidog.com"
             ),
-        )
-
-        val savedPets = petRepository.saveAll(pets).sortedBy { it.id }
+        ).also(petRepository::saveAll)
 
         mockMvc.perform(
             get("/api/pets"))
@@ -128,6 +112,77 @@ class PetControllerTest {
             .andExpect(jsonPath("$[*].name", Matchers.containsInAnyOrder(pets[0].name, pets[1].name)))
             .andExpect(jsonPath("$[*].age", Matchers.containsInAnyOrder(pets[0].age, pets[1].age)))
             .andExpect(jsonPath("$[*].description", Matchers.containsInAnyOrder(pets[0].description, pets[1].description)))
+    }
+
+    @WithMockUser(username = "user1@abc.com", password = "password", roles = ["ADMIN"])
+        @Test
+        fun givenAdminUserWithValiePetData_whenCreatePet_thenSuccess() {
+            mockMvc.perform(
+                post("/api/pets")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content("{\n" +
+                            "    \"name\": \"Amsterdam\",\n" +
+                            "    \"description\": \"Lovely and strong dog. Really good football player!\",\n" +
+                            "    \"age\": 0,\n" +
+                            "    \"type\": \"DOG\",\n" +
+                            "    \"photoLink\": \"wwww.image.com\"\n" +
+                            "}"
+            )
+            )
+                .andExpect(status().isCreated)
+        }
+
+    @WithMockUser(username = "user1@abc.com", password = "password", roles = ["ADMIN"])
+    @Test
+    fun givenInvalidPetData_whenCreatePet_thenBadRequest() {
+        mockMvc.perform(
+            post("/api/pets")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\n" +
+                        "    \"name\": \"ho\",\n" +
+                        "    \"description\": \"lovelycat\",\n" +
+                        "    \"age\": -1,\n" +
+                        "    \"type\": \"CAT\",\n" +
+                        "    \"photoLink\": \"wwww.image.com\"\n" +
+                        "}"
+                )
+        )
+            .andExpect(status().isBadRequest)
+    }
+
+    @WithMockUser(username = "user1@abc.com", password = "password", roles = ["CUSTOMER"])
+    @Test
+    fun givenOtherRolesExceptAdmin_whenCreatePet_thenForbidden() {
+        mockMvc.perform(
+            post("/api/pets")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\n" +
+                        "    \"name\": \"Amsterdam\",\n" +
+                        "    \"description\": \"Lovely and strong dog. Really good football player!\",\n" +
+                        "    \"age\": 0,\n" +
+                        "    \"type\": \"DOG\",\n" +
+                        "    \"photoLink\": \"wwww.image.com\"\n" +
+                        "}"
+                )
+        )
+            .andExpect(status().isForbidden)
+    }
+
+    @Test
+    fun givenUnauthenticatedUser_whenCreatePet_thenUnauthorized() {
+        mockMvc.perform(
+            post("/api/pets")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\n" +
+                        "    \"name\": \"hoiii\",\n" +
+                        "    \"description\": \"lorem ipsum amed akdkdnddndsfsdfsdfsdfsdfdfdfdfg\",\n" +
+                        "    \"age\": 0,\n" +
+                        "    \"type\": \"CAT\",\n" +
+                        "    \"photoLink\": \"wwww.image.com\"\n" +
+                        "}"
+                )
+        )
+            .andExpect(status().isUnauthorized)
     }
 
     @WithMockUser(username = "user1@abc.com", password = "password", roles = ["CUSTOMER"])
@@ -166,7 +221,7 @@ class PetControllerTest {
 
     @WithMockUser(username = "user1@abc.com", password = "password", roles = ["ADMIN"])
     @Test
-    fun givenUsersExceptCustomer_whenAdoptPet_thenForbidden() {
+    fun givenUsersWithRolesExceptCustomer_whenAdoptPet_thenForbidden() {
         val pet = Pet(
             name = "Tom",
             description = "Fast cat. Loves running behind Jerry",
@@ -181,4 +236,19 @@ class PetControllerTest {
             .andExpect(status().isForbidden)
     }
 
+    @Test
+    fun givenUnauthenticatedUser_whenAdoptPet_thenUnauthorized() {
+        val pet = Pet(
+            name = "Tom",
+            description = "Fast cat. Loves running behind Jerry",
+            age = 2,
+            type = PetType.CAT,
+            adopted = false,
+            photoLink = "www.hoicat.com"
+        ).also(petRepository::save)
+
+        mockMvc.perform(
+            patch("/api/pets/${pet.id}"))
+            .andExpect(status().isUnauthorized)
+    }
 }
