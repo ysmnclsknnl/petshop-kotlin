@@ -26,6 +26,11 @@ dependencies {
     developmentOnly("org.springframework.boot:spring-boot-devtools")
     implementation("org.springframework.boot:spring-boot-starter-security")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
+    val testContainers = "1.18.1"
+    testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("org.testcontainers:testcontainers:$testContainers")
+    testImplementation("org.testcontainers:mongodb:$testContainers")
+    testImplementation("org.testcontainers:junit-jupiter:$testContainers")
     implementation("net.datafaker:datafaker:2.0.1")
 }
 
