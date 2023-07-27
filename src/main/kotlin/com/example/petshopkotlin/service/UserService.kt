@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service
 class UserService(
     @Autowired val userRepo: UserRepository,
 ) : UserDetailsService {
-    fun createUser(user: com.example.petshopkotlin.collection.User): com.example.petshopkotlin.collection.User {
+    fun createUser(user: com.example.petshopkotlin.collection.User): String {
          if (userRepo.existsByUserName(user.userName)) {
              throw IllegalArgumentException("User with ${user.userName} already exists!")
          }
@@ -31,7 +31,7 @@ class UserService(
         password = password,
         role = user.role,
         ),
-    )
+    ).username
     }
 
     private fun validateUser(user: com.example.petshopkotlin.collection.User) = listOfNotNull(
@@ -42,13 +42,11 @@ class UserService(
             } else {
                 null
             },
-        if (
-            !user.password.matches("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&.])[A-Za-z\\d@$!%*?&]{8,}$".toRegex())
-            ) {
-            "Password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one digit, and one special symbol (@$!%*?&.)."
-            } else {
-                null
-            },
+     /*   if (!user.password.matches("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@\$!%*?&])[A-Za-z\\d@\$!%*?&]{8,}$".toRegex())) {
+            "Password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one digit, and one special symbol (@\$!%*?&)."
+        } else {
+            null
+        },*/
     )
 
     @Throws(UsernameNotFoundException::class)
