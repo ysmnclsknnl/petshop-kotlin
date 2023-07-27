@@ -27,7 +27,7 @@ class PetController(@Autowired val petService: PetService) {
     @PostMapping
     fun createPet(@RequestBody pet: Pet): ResponseEntity<ObjectId> {
         try {
-            return ResponseEntity.ok(petService.addPet(pet))
+            return ResponseEntity.status(HttpStatus.CREATED).body(petService.addPet(pet))
         } catch (ex: Exception) {
             if (ex is IllegalArgumentException) {
                 throw ResponseStatusException(HttpStatus.BAD_REQUEST, ex.message)

@@ -41,7 +41,7 @@ class AuthControllerTest {
                             "}"
             )
             )
-                .andExpect(status().isOk)
+                .andExpect(status().isCreated)
 
             val savedUser = userRepository.findUserByUsername("aaa@gmail.com")
             assertTrue(savedUser?.userName == "aaa@gmail.com" )

@@ -18,7 +18,7 @@ class UserController(@Autowired val userService: UserService) {
     @PostMapping
     fun register(@RequestBody user: User): ResponseEntity<String> {
         return try {
-            ResponseEntity.ok(userService.createUser(user))
+            ResponseEntity.status(HttpStatus.CREATED).body(userService.createUser(user))
         } catch (e: AuthenticationException) {
             throw ResponseStatusException(HttpStatus.UNAUTHORIZED, "Incorrect email or password.", e)
         } catch (e: IllegalArgumentException) {
