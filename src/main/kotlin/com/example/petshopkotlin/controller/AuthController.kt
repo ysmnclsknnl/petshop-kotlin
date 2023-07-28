@@ -14,7 +14,7 @@ import org.springframework.web.server.ResponseStatusException
 
 @RestController
 @RequestMapping("/api/auth")
-class UserController(@Autowired val userService: UserService) {
+class AuthController(@Autowired val userService: UserService) {
     @PostMapping
     fun register(@RequestBody user: User): ResponseEntity<String> {
         return try {
