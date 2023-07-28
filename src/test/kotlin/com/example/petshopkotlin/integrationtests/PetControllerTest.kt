@@ -1,9 +1,10 @@
-package com.example.petshopkotlin
+package com.example.petshopkotlin.integrationtests
 
 import com.example.petshopkotlin.collection.Pet
 import com.example.petshopkotlin.collection.PetType
 import com.example.petshopkotlin.repository.PetRepository
 import org.hamcrest.Matchers
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -51,7 +52,7 @@ class PetControllerTest {
             ),
         ).also(petRepository::saveAll)
 
-        mockMvc.perform(
+      mockMvc.perform(
             get("/api/pets"))
             .andExpect(status().isUnauthorized)
     }
@@ -117,37 +118,52 @@ class PetControllerTest {
     @WithMockUser(username = "user1@abc.com", password = "password", roles = ["ADMIN"])
         @Test
         fun givenAdminUserWithValiePetData_whenCreatePet_thenSuccess() {
-            mockMvc.perform(
-                post("/api/pets")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content("{\n" +
-                            "    \"name\": \"Amsterdam\",\n" +
-                            "    \"description\": \"Lovely and strong dog. Really good football player!\",\n" +
-                            "    \"age\": 0,\n" +
-                            "    \"type\": \"DOG\",\n" +
-                            "    \"photoLink\": \"wwww.image.com\"\n" +
-                            "}"
-            )
-            )
-                .andExpect(status().isCreated)
+        mockMvc.perform(
+            post("/api/pets")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(
+                    """
+                {
+                    "name": "Amsterdam",
+                    "description": "Lovely and strong dog. Really good football player!",
+                    "age": 0,
+                    "type": "DOG",
+                    "photoLink": "wwww.image.com"
+                }
+                """.trimIndent()
+                )
+        )
+            .andExpect(status().isCreated)
+            .andExpect(jsonPath("$.name").value("Amsterdam"))
+            .andExpect(jsonPath("$.description").value("Lovely and strong dog. Really good football player!"))
+            .andExpect(jsonPath("$.age").value(0))
+            .andExpect(jsonPath("$.type").value("DOG"))
+            .andExpect(jsonPath("$.photoLink").value("wwww.image.com"))
         }
 
     @WithMockUser(username = "user1@abc.com", password = "password", roles = ["ADMIN"])
     @Test
     fun givenInvalidPetData_whenCreatePet_thenBadRequest() {
-        mockMvc.perform(
+     val result = mockMvc.perform(
             post("/api/pets")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content("{\n" +
-                        "    \"name\": \"ho\",\n" +
-                        "    \"description\": \"lovelycat\",\n" +
-                        "    \"age\": -1,\n" +
-                        "    \"type\": \"CAT\",\n" +
-                        "    \"photoLink\": \"wwww.image.com\"\n" +
-                        "}"
+                .content(
+                    """
+                {
+                    "name": "As",
+                    "description": "Lovely !",
+                    "age": -1,
+                    "type": "DOG",
+                    "photoLink": "wwww.image.com"
+                }
+                """.trimIndent()
                 )
         )
             .andExpect(status().isBadRequest)
+         .andReturn()
+
+        val content = result.response.errorMessage
+        assertEquals(content,"Name must be at least 3 characters. Description must be at least 15 characters. Age must be at least 0.")
     }
 
     @WithMockUser(username = "user1@abc.com", password = "password", roles = ["CUSTOMER"])
@@ -156,13 +172,16 @@ class PetControllerTest {
         mockMvc.perform(
             post("/api/pets")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content("{\n" +
-                        "    \"name\": \"Amsterdam\",\n" +
-                        "    \"description\": \"Lovely and strong dog. Really good football player!\",\n" +
-                        "    \"age\": 0,\n" +
-                        "    \"type\": \"DOG\",\n" +
-                        "    \"photoLink\": \"wwww.image.com\"\n" +
-                        "}"
+                .content(
+                    """
+                {
+                    "name": "Amsterdam",
+                    "description": "Lovely and strong dog. Really good football player!",
+                    "age": 0,
+                    "type": "DOG",
+                    "photoLink": "wwww.image.com"
+                }
+                """.trimIndent()
                 )
         )
             .andExpect(status().isForbidden)
@@ -173,13 +192,16 @@ class PetControllerTest {
         mockMvc.perform(
             post("/api/pets")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content("{\n" +
-                        "    \"name\": \"hoiii\",\n" +
-                        "    \"description\": \"lorem ipsum amed akdkdnddndsfsdfsdfsdfsdfdfdfdfg\",\n" +
-                        "    \"age\": 0,\n" +
-                        "    \"type\": \"CAT\",\n" +
-                        "    \"photoLink\": \"wwww.image.com\"\n" +
-                        "}"
+                .content(
+                    """
+                {
+                    "name": "Amsterdam",
+                    "description": "Lovely and strong dog. Really good football player!",
+                    "age": 0,
+                    "type": "DOG",
+                    "photoLink": "wwww.image.com"
+                }
+                """.trimIndent()
                 )
         )
             .andExpect(status().isUnauthorized)
