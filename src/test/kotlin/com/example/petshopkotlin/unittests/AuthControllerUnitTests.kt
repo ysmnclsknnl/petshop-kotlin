@@ -3,7 +3,10 @@ package com.example.petshopkotlin.unittests
 import com.example.petshopkotlin.collection.Role
 import com.example.petshopkotlin.collection.User
 import com.example.petshopkotlin.controller.AuthController
+import com.example.petshopkotlin.repository.UserRepository
 import com.example.petshopkotlin.service.UserService
+import org.bson.types.ObjectId
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -20,7 +23,6 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders
 
 @ExtendWith(MockitoExtension::class)
 class AuthControllerUnitTests {
-
     @Mock
     private lateinit var service: UserService
 
@@ -34,32 +36,71 @@ class AuthControllerUnitTests {
         mvc = MockMvcBuilders.standaloneSetup(authController).build()
     }
     @Test
-    fun givenValidUser_whenRegister_thenSuccess() {
+    fun givenValidUser_whenRegister_thenCreated() {
         val user = User(
+            id = ObjectId("64c3bd122e034e4dcc32ebf0"),
             userName = "aaa@gmail.com",
             password = "123456",
             role = Role.CUSTOMER
         )
 
-        // Mock the behavior of the service method using custom argument matcher
-        given(service.createUser(argThat(UserMatcher(user)))).willReturn(user.userName)
 
+        given(service.createUser(user)).willReturn(user.userName)
 
-        // Perform the request and verify the response
         val result = mvc.perform(
             post("/api/auth")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(
-                    "{\n" +
-                            "    \"userName\": \"aaa@gmail.com\",\n" +
-                            "    \"password\": \"123456\",\n" +
-                            "    \"role\": \"CUSTOMER\"\n" +
-                            "}"
-                )
+                """
+                            { 
+                              "id" : "64c3bd122e034e4dcc32ebf0",
+                              "userName": "aaa@gmail.com",
+                               "password": "123456",
+                               "role": "CUSTOMER"
+                            }
+                            """.trimIndent()
+            )
         )
             .andExpect(status().isCreated)
             .andReturn()
-        println(result.response.errorMessage)
+         val content = result.response.contentAsString
+
+         assertEquals(content, user.userName )
+
+    }
+
+    @Test
+    fun givenInValidUser_whenRegister_thenBadRequest() {
+        val user = User(
+            id = ObjectId("64c3bd122e034e4dcc32ebf0"),
+            userName = "com",
+            password = "123456",
+            role = Role.CUSTOMER
+        )
+
+        val errorMessage = "Email address should consist of numbers, letters and '.', '-', '_' symbols"
+
+        given(service.createUser(user)).willThrow(IllegalArgumentException(errorMessage))
+
+        val result = mvc.perform(
+            post("/api/auth")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(
+                    """
+                            { 
+                              "id" : "64c3bd122e034e4dcc32ebf0",
+                              "userName": "com",
+                               "password": "123456",
+                               "role": "CUSTOMER"
+                            }
+                            """.trimIndent()
+                )
+        )
+            .andExpect(status().isBadRequest)
+            .andReturn()
+        val content = result.response.errorMessage
+
+        assertEquals(content, errorMessage )
 
     }
 }
