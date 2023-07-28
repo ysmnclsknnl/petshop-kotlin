@@ -12,10 +12,10 @@ class PetService(@Autowired val repo: PetRepository) {
 
     fun getPets() = repo.findAllByOrderByIdDesc()
 
-    fun addPet(pet: Pet): ObjectId {
+    fun addPet(pet: Pet): Pet {
         val errors: List<String> = validatePet(pet)
         if (errors.isEmpty()) {
-            return repo.save(pet).id
+            return repo.save(pet)
         }
 
         throw IllegalArgumentException(errors.joinToString(" "))

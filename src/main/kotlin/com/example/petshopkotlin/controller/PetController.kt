@@ -25,7 +25,7 @@ class PetController(@Autowired val petService: PetService) {
 
     @RolesAllowed("ROLE_ADMIN")
     @PostMapping
-    fun createPet(@RequestBody pet: Pet): ResponseEntity<ObjectId> {
+    fun createPet(@RequestBody pet: Pet): ResponseEntity<Pet> {
         try {
             return ResponseEntity.status(HttpStatus.CREATED).body(petService.addPet(pet))
         } catch (ex: Exception) {
