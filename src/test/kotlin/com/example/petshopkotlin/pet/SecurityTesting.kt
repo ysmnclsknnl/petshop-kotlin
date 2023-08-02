@@ -2,24 +2,26 @@ package com.example.petshopkotlin.pet
 
 import com.example.petshopkotlin.pet.model.Pet
 import com.example.petshopkotlin.pet.model.PetType
+import com.example.petshopkotlin.security.SecurityConfig
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.BDDMockito.*
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.autoconfigure.ImportAutoConfiguration
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.http.MediaType
+import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.test.context.support.WithAnonymousUser
 import org.springframework.security.test.context.support.WithMockUser
-import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 
-@ExtendWith(SpringExtension::class)
 @WebMvcTest(PetController::class)
+@ImportAutoConfiguration(SecurityConfig::class)
 class SecurityTests {
 
     @Autowired
@@ -28,6 +30,10 @@ class SecurityTests {
     @MockBean
     private lateinit var petService: PetService
 
+    @MockBean
+    private lateinit var userDetailsService: UserDetailsService
+
+    @WithAnonymousUser
     @Test
     fun givenUnauthenticatedUser_whenGetPet_thenUnauthorized() {
         val pets = listOf(Pet(
@@ -171,4 +177,62 @@ class SecurityTests {
         )
             .andExpect(status().isUnauthorized)
     }
+
+    @WithMockUser(roles = ["CUSTOMER"])
+    @Test
+    fun givenCustomerUser_whenAdoptPet_thenSuccess() {
+        val pet = Pet(
+            name = "Tom",
+            description = "Very fast cat. Loves eating fish.",
+            age = 2,
+            type = PetType.CAT,
+            adopted = true,
+            photoLink = "www.foo.com",
+        )
+
+        given(petService.adoptPet(pet.id)).willReturn("You successfully adopted ${pet.name}!")
+
+        mvc.perform(
+            patch("/api/pets/${pet.id}")
+        )
+            .andExpect(status().isOk)
+    }
+    @WithMockUser(roles = ["ADMIN"])
+    @Test
+    fun givenUsersWithRolesExceptCustomer_whenAdoptPet_thenForbidden() {
+        val pet = Pet(
+            name = "Tom",
+            description = "Very fast cat. Loves eating fish.",
+            age = 2,
+            type = PetType.CAT,
+            adopted = true,
+            photoLink = "www.foo.com",
+        )
+
+        given(petService.adoptPet(pet.id)).willReturn("You successfully adopted ${pet.name}!")
+
+        mvc.perform(
+            patch("/api/pets/${pet.id}"))
+            .andExpect(status().isForbidden)
+    }
+
+    @WithAnonymousUser
+    @Test
+    fun givenUnauthenticatedUser_whenAdoptPet_thenUnauthorized() {
+        val pet = Pet(
+            name = "Tom",
+            description = "Very fast cat. Loves eating fish.",
+            age = 2,
+            type = PetType.CAT,
+            adopted = true,
+            photoLink = "www.foo.com",
+        )
+
+        given(petService.adoptPet(pet.id)).willReturn("You successfully adopted ${pet.name}!")
+
+        mvc.perform(
+            patch("/api/pets/${pet.id}"))
+            .andExpect(status().isUnauthorized)
+    }
+
 }
