@@ -12,7 +12,7 @@ import org.springframework.web.server.ResponseStatusException
 @RestController
 @RequestMapping("/api/pets")
 class PetController(val petService: PetService) {
-    @RolesAllowed("ROLE_ADMIN", "ROLE_CUSTOMER")
+    @RolesAllowed("ADMIN", "CUSTOMER")
     @GetMapping
     fun getPets(): ResponseEntity<List<Pet>> {
         try {
@@ -22,7 +22,7 @@ class PetController(val petService: PetService) {
         }
     }
 
-    @RolesAllowed("ROLE_ADMIN")
+    @RolesAllowed("ADMIN")
     @PostMapping
     fun createPet(@RequestBody pet: Pet): ResponseEntity<Pet> {
         try {
@@ -35,7 +35,7 @@ class PetController(val petService: PetService) {
         }
     }
 
-    @RolesAllowed("ROLE_CUSTOMER")
+    @RolesAllowed("CUSTOMER")
     @PatchMapping("/{id}")
     fun adoptPet(@PathVariable id: ObjectId): ResponseEntity<String> {
         try {

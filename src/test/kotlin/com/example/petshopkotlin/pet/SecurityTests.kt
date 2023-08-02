@@ -2,24 +2,25 @@ package com.example.petshopkotlin.pet
 
 import com.example.petshopkotlin.pet.model.Pet
 import com.example.petshopkotlin.pet.model.PetType
+import com.example.petshopkotlin.security.SecurityConfig
+import com.example.petshopkotlin.user.UserService
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.BDDMockito.*
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.autoconfigure.ImportAutoConfiguration
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.http.MediaType
 import org.springframework.security.test.context.support.WithAnonymousUser
 import org.springframework.security.test.context.support.WithMockUser
-import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 
-@ExtendWith(SpringExtension::class)
 @WebMvcTest(PetController::class)
+@ImportAutoConfiguration(SecurityConfig::class)
 class SecurityTests {
 
     @Autowired
@@ -28,6 +29,8 @@ class SecurityTests {
     @MockBean
     private lateinit var petService: PetService
 
+    @MockBean
+    private lateinit var userService: UserService
     @Test
     fun givenUnauthenticatedUser_whenGetPet_thenUnauthorized() {
         val pets = listOf(Pet(
