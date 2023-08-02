@@ -20,7 +20,7 @@ internal class SecurityOff {
                 it.disable()
             }
             .authorizeHttpRequests {
-                it.anyRequest().permitAll();
+                it.anyRequest().permitAll()
             }
             .sessionManagement { SessionCreationPolicy.STATELESS }
         return http.build()
