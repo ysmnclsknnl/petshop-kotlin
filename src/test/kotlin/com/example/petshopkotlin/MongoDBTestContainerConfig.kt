@@ -6,7 +6,7 @@ import org.testcontainers.containers.MongoDBContainer
 import org.testcontainers.junit.jupiter.Container
 
 @Configuration
-class MongoDBTestContainerConfig {
+internal class MongoDBTestContainerConfig {
     companion object {
             @Container
             val mongoDBContainer: MongoDBContainer = MongoDBContainer("mongo:latest")
