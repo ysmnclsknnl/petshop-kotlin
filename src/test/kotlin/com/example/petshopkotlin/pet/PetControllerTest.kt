@@ -116,7 +116,7 @@ class PetControllerTest {
 
     @WithMockUser(username = "user1@abc.com", password = "password", roles = ["ADMIN"])
         @Test
-        fun givenAdminUserWithValiePetData_whenCreatePet_thenSuccess() {
+        fun givenAdminUserWithValidPetData_whenCreatePet_thenSuccess() {
         mockMvc.perform(
             post("/api/pets")
                 .contentType(MediaType.APPLICATION_JSON)
