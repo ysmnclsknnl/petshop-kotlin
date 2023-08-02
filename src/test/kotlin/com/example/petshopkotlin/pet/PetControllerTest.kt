@@ -1,5 +1,6 @@
 package com.example.petshopkotlin.pet
 
+import com.example.petshopkotlin.SecurityOff
 import com.example.petshopkotlin.pet.model.Pet
 import com.example.petshopkotlin.pet.model.PetType
 import org.hamcrest.Matchers
@@ -7,6 +8,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.autoconfigure.ImportAutoConfiguration
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.annotation.Import
@@ -22,7 +24,7 @@ import org.testcontainers.junit.jupiter.Testcontainers
 @AutoConfigureMockMvc
 @SpringBootTest
 @Testcontainers
-@ActiveProfiles("SecurityOff")
+@ImportAutoConfiguration(SecurityOff::class)
 class PetControllerTest {
     @Autowired
     lateinit var mockMvc: MockMvc

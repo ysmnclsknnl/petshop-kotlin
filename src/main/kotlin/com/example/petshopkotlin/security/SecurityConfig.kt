@@ -1,5 +1,6 @@
 package com.example.petshopkotlin.security
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -17,7 +18,9 @@ import org.springframework.security.web.SecurityFilterChain
 
 @Configuration
 @EnableWebSecurity
-class SecurityConfig(val userDetailsService: UserDetailsService) {
+@EnableMethodSecurity(securedEnabled = true, jsr250Enabled = true)
+@ConditionalOnMissingBean(SecurityFilterChain::class)
+open class SecurityConfig(val userDetailsService: UserDetailsService) {
     @Bean
     fun customAuthenticationManager(http: HttpSecurity): AuthenticationManager {
         val authenticationManagerBuilder: AuthenticationManagerBuilder = http.getSharedObject(
@@ -32,46 +35,22 @@ class SecurityConfig(val userDetailsService: UserDetailsService) {
     fun bCryptPasswordEncoder(): BCryptPasswordEncoder {
         return BCryptPasswordEncoder()
     }
-
-
-    @Profile("!SecurityOff")
-    @EnableMethodSecurity(securedEnabled = true, jsr250Enabled = true)
-    class SecurityOn {
-        @Bean
-        fun secureFilterChain(http: HttpSecurity): SecurityFilterChain {
-            http
-                .csrf()
-                .disable()
-                .authorizeRequests()
-                .and()
-                .httpBasic()
-                .and()
-                .authorizeRequests()
-                .anyRequest()
-                .permitAll()
-                .and()
-                .sessionManagement()
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-            return http.build()
-        }
-
+    @Bean
+    fun secureFilterChain(http: HttpSecurity): SecurityFilterChain {
+        http
+            .csrf()
+            .disable()
+            .authorizeRequests()
+            .and()
+            .httpBasic()
+            .and()
+            .authorizeRequests()
+            .anyRequest()
+            .permitAll()
+            .and()
+            .sessionManagement()
+            .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+        return http.build()
     }
-
-    @Profile("SecurityOff")
-    class SecurityOff {
-        @Bean
-        fun unsecureFilterChain(http: HttpSecurity): SecurityFilterChain {
-            http
-                .csrf {
-                    it.disable()
-                }
-                .authorizeHttpRequests {
-                    it.requestMatchers("/**").permitAll();
-                }
-                .sessionManagement { SessionCreationPolicy.STATELESS }
-            return http.build()
-        }
-    }
-
 
 }
