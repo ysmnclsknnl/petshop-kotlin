@@ -9,23 +9,26 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.context.annotation.Import
 import org.springframework.http.MediaType
 import org.springframework.security.test.context.support.WithMockUser
+import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import org.testcontainers.junit.jupiter.Testcontainers
+
 @AutoConfigureMockMvc
 @SpringBootTest
 @Testcontainers
+@ActiveProfiles("SecurityOff")
 class PetControllerTest {
     @Autowired
-    lateinit var mockMvc : MockMvc
+    lateinit var mockMvc: MockMvc
 
     @Autowired
     lateinit var petRepository: PetRepository
-
 
     @BeforeEach
     fun setUp() {
@@ -51,8 +54,9 @@ class PetControllerTest {
             ),
         ).also(petRepository::saveAll)
 
-      mockMvc.perform(
-            get("/api/pets"))
+        mockMvc.perform(
+            get("/api/pets")
+        )
             .andExpect(status().isUnauthorized)
     }
 
@@ -77,12 +81,18 @@ class PetControllerTest {
         ).also(petRepository::saveAll)
 
         mockMvc.perform(
-            get("/api/pets"))
+            get("/api/pets")
+        )
             .andExpect(status().isOk)
             .andExpect(jsonPath("$.length()").value(pets.size))
             .andExpect(jsonPath("$[*].name", Matchers.containsInAnyOrder(pets[0].name, pets[1].name)))
             .andExpect(jsonPath("$[*].age", Matchers.containsInAnyOrder(pets[0].age, pets[1].age)))
-            .andExpect(jsonPath("$[*].description", Matchers.containsInAnyOrder(pets[0].description, pets[1].description)))
+            .andExpect(
+                jsonPath(
+                    "$[*].description",
+                    Matchers.containsInAnyOrder(pets[0].description, pets[1].description)
+                )
+            )
     }
 
     @WithMockUser(username = "user1@abc.com", password = "password", roles = ["CUSTOMER"])
@@ -106,17 +116,23 @@ class PetControllerTest {
         ).also(petRepository::saveAll)
 
         mockMvc.perform(
-            get("/api/pets"))
+            get("/api/pets")
+        )
             .andExpect(status().isOk)
             .andExpect(jsonPath("$.length()").value(pets.size))
             .andExpect(jsonPath("$[*].name", Matchers.containsInAnyOrder(pets[0].name, pets[1].name)))
             .andExpect(jsonPath("$[*].age", Matchers.containsInAnyOrder(pets[0].age, pets[1].age)))
-            .andExpect(jsonPath("$[*].description", Matchers.containsInAnyOrder(pets[0].description, pets[1].description)))
+            .andExpect(
+                jsonPath(
+                    "$[*].description",
+                    Matchers.containsInAnyOrder(pets[0].description, pets[1].description)
+                )
+            )
     }
 
     @WithMockUser(username = "user1@abc.com", password = "password", roles = ["ADMIN"])
-        @Test
-        fun givenAdminUserWithValidPetData_whenCreatePet_thenSuccess() {
+    @Test
+    fun givenAdminUserWithValidPetData_whenCreatePet_thenSuccess() {
         mockMvc.perform(
             post("/api/pets")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -138,12 +154,12 @@ class PetControllerTest {
             .andExpect(jsonPath("$.age").value(0))
             .andExpect(jsonPath("$.type").value("DOG"))
             .andExpect(jsonPath("$.photoLink").value("wwww.image.com"))
-        }
+    }
 
     @WithMockUser(username = "user1@abc.com", password = "password", roles = ["ADMIN"])
     @Test
     fun givenInvalidPetData_whenCreatePet_thenBadRequest() {
-     val result = mockMvc.perform(
+        val result = mockMvc.perform(
             post("/api/pets")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(
@@ -159,10 +175,13 @@ class PetControllerTest {
                 )
         )
             .andExpect(status().isBadRequest)
-         .andReturn()
+            .andReturn()
 
         val content = result.response.errorMessage
-        assertEquals(content,"Name must be at least 3 characters. Description must be at least 15 characters. Age must be at least 0.")
+        assertEquals(
+            content,
+            "Name must be at least 3 characters. Description must be at least 15 characters. Age must be at least 0."
+        )
     }
 
     @WithMockUser(username = "user1@abc.com", password = "password", roles = ["CUSTOMER"])
@@ -219,7 +238,8 @@ class PetControllerTest {
         ).also(petRepository::save)
 
         mockMvc.perform(
-            patch("/api/pets/${pet.id}"))
+            patch("/api/pets/${pet.id}")
+        )
             .andExpect(status().isOk)
     }
 
@@ -236,7 +256,8 @@ class PetControllerTest {
         ).also(petRepository::save)
 
         mockMvc.perform(
-            patch("/api/pets/${pet.id}"))
+            patch("/api/pets/${pet.id}")
+        )
             .andExpect(status().isBadRequest)
     }
 
@@ -253,7 +274,8 @@ class PetControllerTest {
         ).also(petRepository::save)
 
         mockMvc.perform(
-            patch("/api/pets/${pet.id}"))
+            patch("/api/pets/${pet.id}")
+        )
             .andExpect(status().isForbidden)
     }
 
@@ -269,7 +291,8 @@ class PetControllerTest {
         ).also(petRepository::save)
 
         mockMvc.perform(
-            patch("/api/pets/${pet.id}"))
+            patch("/api/pets/${pet.id}")
+        )
             .andExpect(status().isUnauthorized)
     }
 }
