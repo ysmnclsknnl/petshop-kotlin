@@ -1,14 +1,12 @@
-package com.example.petshopkotlin.dataseed
+package com.example.petshopkotlin.pet
 
-import com.example.petshopkotlin.collection.Pet
-import com.example.petshopkotlin.collection.PetType
-import com.example.petshopkotlin.repository.PetRepository
+import com.example.petshopkotlin.pet.model.Pet
+import com.example.petshopkotlin.pet.model.PetType
 import net.datafaker.Faker
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.CommandLineRunner
 import org.springframework.stereotype.Component
 @Component
-class PetDataSeeder(@Autowired val petRepository: PetRepository) : CommandLineRunner {
+class PetDataSeeder(val petRepository: PetRepository) : CommandLineRunner {
 
     fun seedData() {
         val faker = Faker()

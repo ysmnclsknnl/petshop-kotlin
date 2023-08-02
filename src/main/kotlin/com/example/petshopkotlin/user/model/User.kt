@@ -1,6 +1,7 @@
 
-package com.example.petshopkotlin.collection
+package com.example.petshopkotlin.user.model
 
+import com.example.petshopkotlin.user.model.Role
 import org.bson.types.ObjectId
 import org.springframework.data.mongodb.core.mapping.Document
 import org.springframework.data.mongodb.core.mapping.MongoId
@@ -12,7 +13,7 @@ data class User(
     @MongoId
     private val id: ObjectId = ObjectId(),
     val userName: String,
-    private val password: String,
+    private var password: String,
     val role: Role,
 ) : UserDetails {
     override fun getAuthorities() = listOf(SimpleGrantedAuthority("ROLE_$role"))

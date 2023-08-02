@@ -1,6 +1,6 @@
-package com.example.petshopkotlin.repository
+package com.example.petshopkotlin.user
 
-import com.example.petshopkotlin.collection.User
+import com.example.petshopkotlin.user.model.User
 import org.bson.types.ObjectId
 import org.springframework.data.mongodb.repository.MongoRepository
 import org.springframework.data.mongodb.repository.Query

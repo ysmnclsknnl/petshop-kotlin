@@ -1,4 +1,4 @@
-package com.example.petshopkotlin.collection
+package com.example.petshopkotlin.pet.model
 
 import com.example.petshopkotlin.serializer.ObjectIdSerializer
 import com.fasterxml.jackson.databind.annotation.JsonSerialize
@@ -11,10 +11,10 @@ data class Pet(
     @Id
     @JsonSerialize(using = ObjectIdSerializer::class)
     val id: ObjectId = ObjectId(),
-    val name: String,
-    val description: String,
-    val age: Int,
-    val type: PetType,
-    val adopted: Boolean = false,
-    val photoLink: String,
+    var name: String,
+    var description: String,
+    var age: Int,
+    var type: PetType,
+    var adopted: Boolean = false,
+    var photoLink: String,
 )

@@ -1,7 +1,6 @@
-package com.example.petshopkotlin.controller
+package com.example.petshopkotlin.pet
 
-import com.example.petshopkotlin.collection.Pet
-import com.example.petshopkotlin.service.PetService
+import com.example.petshopkotlin.pet.model.Pet
 import jakarta.annotation.security.RolesAllowed
 import org.bson.types.ObjectId
 import org.springframework.beans.factory.annotation.Autowired
@@ -12,10 +11,10 @@ import org.springframework.web.server.ResponseStatusException
 
 @RestController
 @RequestMapping("/api/pets")
-class PetController(@Autowired val petService: PetService) {
+class PetController(val petService: PetService) {
     @RolesAllowed("ROLE_ADMIN", "ROLE_CUSTOMER")
     @GetMapping
-    fun getPets(): ResponseEntity<List<Pet?>> {
+    fun getPets(): ResponseEntity<List<Pet>> {
         try {
             return ResponseEntity.ok(petService.getPets())
         } catch (ex: Exception) {

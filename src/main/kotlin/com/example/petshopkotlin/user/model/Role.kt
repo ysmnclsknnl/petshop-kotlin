@@ -1,4 +1,4 @@
-package com.example.petshopkotlin.collection
+package com.example.petshopkotlin.user.model
 
 enum class Role {
     CUSTOMER,

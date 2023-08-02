@@ -1,8 +1,6 @@
-package com.example.petshopkotlin.controller
+package com.example.petshopkotlin.user
 
-import com.example.petshopkotlin.collection.User
-import com.example.petshopkotlin.service.UserService
-import org.springframework.beans.factory.annotation.Autowired
+import com.example.petshopkotlin.user.model.User
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.AuthenticationException
@@ -14,7 +12,7 @@ import org.springframework.web.server.ResponseStatusException
 
 @RestController
 @RequestMapping("/api/auth")
-class AuthController(@Autowired val userService: UserService) {
+class AuthController(private val userService: UserService) {
     @PostMapping
     fun register(@RequestBody user: User): ResponseEntity<String> {
         return try {
