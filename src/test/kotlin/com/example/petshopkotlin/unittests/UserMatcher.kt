@@ -1,6 +1,6 @@
 package com.example.petshopkotlin.unittests
 
-import com.example.petshopkotlin.collection.User
+import com.example.petshopkotlin.user.model.User
 import org.mockito.ArgumentMatcher
 
 class UserMatcher(private val expectedUser: User) : ArgumentMatcher<User> {

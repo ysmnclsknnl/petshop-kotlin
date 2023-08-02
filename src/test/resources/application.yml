@@ -5,6 +5,4 @@ spring:
       port: ${mongodb.container.port}
       database: PetShop_TEST
       auto-index-creation: true
-  security:
-    basic :
-      enabled: false
+

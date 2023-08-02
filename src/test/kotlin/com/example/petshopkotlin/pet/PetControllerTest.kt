@@ -1,8 +1,7 @@
-package com.example.petshopkotlin.integrationtests
+package com.example.petshopkotlin.pet
 
-import com.example.petshopkotlin.collection.Pet
-import com.example.petshopkotlin.collection.PetType
-import com.example.petshopkotlin.repository.PetRepository
+import com.example.petshopkotlin.pet.model.Pet
+import com.example.petshopkotlin.pet.model.PetType
 import org.hamcrest.Matchers
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach

@@ -1,16 +1,14 @@
 package com.example.petshopkotlin.unittests
 
-import com.example.petshopkotlin.collection.Role
-import com.example.petshopkotlin.collection.User
-import com.example.petshopkotlin.controller.AuthController
-import com.example.petshopkotlin.repository.UserRepository
-import com.example.petshopkotlin.service.UserService
+import com.example.petshopkotlin.user.model.Role
+import com.example.petshopkotlin.user.model.User
+import com.example.petshopkotlin.user.AuthController
+import com.example.petshopkotlin.user.UserService
 import org.bson.types.ObjectId
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
-import org.mockito.ArgumentMatchers.argThat
 import org.mockito.InjectMocks
 import org.mockito.Mock
 import org.mockito.BDDMockito.given

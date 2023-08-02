@@ -1,8 +1,7 @@
-package com.example.petshopkotlin.integrationtests
+package com.example.petshopkotlin.user
 
-import com.example.petshopkotlin.collection.Role
-import com.example.petshopkotlin.collection.User
-import com.example.petshopkotlin.repository.UserRepository
+import com.example.petshopkotlin.user.model.Role
+import com.example.petshopkotlin.user.model.User
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
