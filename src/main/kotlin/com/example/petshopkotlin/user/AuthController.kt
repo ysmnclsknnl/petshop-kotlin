@@ -4,6 +4,7 @@ import com.example.petshopkotlin.user.model.User
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.AuthenticationException
+import org.springframework.security.core.userdetails.UsernameNotFoundException
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
@@ -29,9 +30,12 @@ class AuthController(private val userService: UserService) {
     @PostMapping("/login")
     fun login(@RequestBody username: String): ResponseEntity<org.springframework.security.core.userdetails.User> {
         return try {
-            ResponseEntity.ok(userService.loadUserByUsername(username))
-        } catch (e: AuthenticationException) {
-            throw ResponseStatusException(HttpStatus.UNAUTHORIZED, "Incorrect email or password.", e)
+            val user = userService.loadUserByUsername(username)
+            ResponseEntity.ok(user)
+        }
+        catch(e: UsernameNotFoundException)
+        {
+            throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Incorrect email or password.", e)
         }
     }
 }
