@@ -39,7 +39,7 @@ class AuthControllerTest {
                         """
                             {
                               "userName": "aaa@gmail.com",
-                               "password": "123456",
+                               "password": "1234567Ab$",
                                "role": "CUSTOMER"
                             }
                             """.trimIndent()
@@ -74,15 +74,19 @@ class AuthControllerTest {
             .andReturn()
 
         val content = result.response.errorMessage
+        val errors = listOf(
+            "Email address should consist of numbers, letters, and '.', '-', '_' symbols.",
+            "Password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one digit, and one special symbol @$!%*?&"
+        ).joinToString(" ")
 
-        assertEquals(content, "Email address should consist of numbers, letters and '.', '-', '_' symbols")
+        assertEquals(content, errors)
     }
 
     @Test
     fun givenExistingUserName_whenRegister_thenBadRequest() {
         val user = User(
             userName = "aaa@gmail.com",
-            password = "123456",
+            password = "1234567Ab$",
             role = Role.CUSTOMER,
         ).also(userRepository::save)
 
@@ -93,7 +97,7 @@ class AuthControllerTest {
                     """
                             {
                               "userName": "aaa@gmail.com",
-                               "password": "123456",
+                               "password": "1234567Ab$",
                                "role": "CUSTOMER"
                             }
                             """.trimIndent()
@@ -105,5 +109,29 @@ class AuthControllerTest {
         val content = result.response.errorMessage
 
         assertEquals(content, "User with ${user.userName} already exists!")
+    }
+
+    @Test
+    fun login() {
+        val user = User(
+            userName = "aaa@gmail.com",
+            password = "1234567Ab$",
+            role = Role.CUSTOMER,
+        ).also(userRepository::save)
+
+        val result = mockMvc.perform(
+            post("/api/auth/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(
+                    """
+                            {
+                              "userName": "aaa@gmail.com",
+                               "password": "1234567Ab$"
+                            }
+                            """.trimIndent()
+                )
+        )
+            .andExpect(status().isOk)
+            .andReturn()
     }
 }
