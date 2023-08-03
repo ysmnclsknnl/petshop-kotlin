@@ -15,8 +15,7 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.*
 import org.testcontainers.junit.jupiter.Testcontainers
 
 @SpringBootTest
@@ -36,7 +35,7 @@ class PetControllerTest {
     }
 
     @Test
-    fun getsPets() {
+    fun getPets() {
         val pets = listOf(
             Pet(
                 name = "Tom",
@@ -64,7 +63,7 @@ class PetControllerTest {
     }
 
         @Test
-        fun givenValidData_ThenCreatesPets() {
+        fun `createPet should return a pet along with status created when pet is valid`() {
         mockMvc.perform(
             post("/api/pets")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -89,7 +88,7 @@ class PetControllerTest {
         }
 
     @Test
-    fun givenInvalidPetData_whenCreatePet_thenBadRequest() {
+    fun `createPet should return status BadRequest when pet is invalid `() {
      val result = mockMvc.perform(
             post("/api/pets")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -113,7 +112,7 @@ class PetControllerTest {
     }
 
     @Test
-    fun givenANotAdoptedPetId_whenAdoptPet_thenSuccess() {
+    fun `adoptPet should return a success message along with status ok, when pet id is valid and pet is not adopted`() {
         val pet = Pet(
             name = "Tom",
             description = "Fast cat. Loves running behind Jerry",
@@ -134,7 +133,7 @@ class PetControllerTest {
     }
 
     @Test
-    fun givenAdoptedPet_whenAdoptPet_thenBadRequest() {
+    fun `adoptPet should return an error message along with status BadRequest, when pet is adopted`() {
         val pet = Pet(
             name = "Tom",
             description = "Fast cat. Loves running behind Jerry",
@@ -153,8 +152,8 @@ class PetControllerTest {
     }
 
     @Test
-    fun givenNotExistingPetId_whenAdoptPet_thenBadRequest() {
-        val pet = Pet(
+    fun `adoptPet should return an error message along with status BadRequest, when pet doesn't exist`() {
+        Pet(
             name = "Tom",
             description = "Fast cat. Loves running behind Jerry",
             age = 2,

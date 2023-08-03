@@ -14,10 +14,10 @@ class UserService(
 ) : UserDetailsService {
     fun createUser(user: com.example.petshopkotlin.user.model.User): String {
         require(!userRepo.existsByUserName(user.userName)) {"User with ${user.userName} already exists!"}
-        val errors = validateUser(user).joinToString(" ")
+        val errors = validateUser(user)
         require(errors.isBlank()) {errors}
 
-        val password = BCryptPasswordEncoder().encode(user.password)
+        val password = encryptPassword(user.password)
 
     return userRepo.save(
         com.example.petshopkotlin.user.model.User(
@@ -28,8 +28,9 @@ class UserService(
     ).username
     }
 
-    private fun validateUser(user: com.example.petshopkotlin.user.model.User): List<String> {
-        val emailRegex = "^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}".toRegex()
+    internal fun validateUser(user: com.example.petshopkotlin.user.model.User): String {
+
+        val emailRegex = "^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}\$".toRegex()
         val passwordRegex = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@\$!%*?&])[A-Za-z\\d@\$!%*?&]{8,}$".toRegex()
 
         return listOfNotNull(
@@ -37,11 +38,13 @@ class UserService(
                 ?.let { "Email address should consist of numbers, letters, and '.', '-', '_' symbols." },
             user.password.takeIf { !it.matches(passwordRegex) }
                 ?.let { "Password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one digit, and one special symbol @$!%*?&" }
-        )
+        ).joinToString (" ")
     }
 
     @Throws(UsernameNotFoundException::class)
     override fun loadUserByUsername(userName: String) = userRepo.findUserByUsername(userName)?.let {
         User(it.username, it.password, listOf(GrantedAuthority { "ROLE_${it.role.name}" }))
     }
+
+ private fun encryptPassword(password: String) = BCryptPasswordEncoder().encode(password)
 }
