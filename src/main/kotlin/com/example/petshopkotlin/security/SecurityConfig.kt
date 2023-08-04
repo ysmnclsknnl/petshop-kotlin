@@ -43,13 +43,13 @@ class SecurityConfig(val userDetailsService: UserDetailsService) {
                 it.disable()
             }
          .exceptionHandling {
-            it.authenticationEntryPoint(HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
+             it.authenticationEntryPoint(HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
         }
             .authorizeHttpRequests {
                 it.requestMatchers("get", "/api/pets").hasAnyRole("ADMIN", "CUSTOMER")
                 it.requestMatchers("post", "/api/pets").hasRole("ADMIN")
                 it.requestMatchers("patch", "/api/pets/{id}").hasRole("CUSTOMER")
-                it.requestMatchers("/api/users/login").permitAll()
+                it.requestMatchers("/api/auth/**").permitAll()
             }
             .sessionManagement{
                 it.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
