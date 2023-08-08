@@ -20,7 +20,7 @@ class PetServiceTest {
         description = "Cute dog. Likes to play fetch",
         age = 3,
         type = PetType.DOG,
-        photoLink = "www.hoidog.com"
+        photoLink = "https://www.hoidog.com"
     )
 
     @Test
@@ -58,6 +58,16 @@ class PetServiceTest {
         val petWithoutImage = validPet.copy(photoLink = "")
 
         val validationResult = petService.validatePet(petWithoutImage)
-        assertEquals("Pet must have an image link.", validationResult)
+        assertEquals("Pet must have an image link. Image link should should start with http or https and not contain spaces.", validationResult)
+    }
+
+    @Test
+    fun `pet without a valid image link should have validation error`() {
+        val petWithInvalidImageLink = validPet.copy(photoLink = "www.invalidlink.com")
+
+        val validationResult = petService.validatePet(petWithInvalidImageLink)
+        assertEquals(
+            "Image link should should start with http or https and not contain spaces.",
+            validationResult)
     }
 }

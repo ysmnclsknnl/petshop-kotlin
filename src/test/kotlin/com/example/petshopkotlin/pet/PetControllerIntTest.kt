@@ -42,14 +42,14 @@ class PetControllerTest {
                 description = "Fast cat. Loves running behind Jerry",
                 age = 2,
                 type = PetType.CAT,
-                photoLink = "www.hoicat.com"
+                photoLink = "https://www.hoicat.com"
             ),
             Pet(
                 name = "Cotton",
                 description = "Cute dog. Likes to play fetch",
                 age = 3,
                 type = PetType.DOG,
-                photoLink = "www.hoidog.com"
+                photoLink = "https://www.hoidog.com"
             ),
         ).also(petRepository::saveAll)
 
@@ -60,6 +60,8 @@ class PetControllerTest {
             .andExpect(jsonPath("$[*].name", Matchers.containsInAnyOrder(pets[0].name, pets[1].name)))
             .andExpect(jsonPath("$[*].age", Matchers.containsInAnyOrder(pets[0].age, pets[1].age)))
             .andExpect(jsonPath("$[*].description", Matchers.containsInAnyOrder(pets[0].description, pets[1].description)))
+            .andExpect(jsonPath("$[*].type", Matchers.containsInAnyOrder(pets[0].type.toString(), pets[1].type.toString())))
+            .andExpect(jsonPath("$[*].photoLink", Matchers.containsInAnyOrder(pets[0].photoLink, pets[1].photoLink)))
     }
 
         @Test
@@ -74,7 +76,7 @@ class PetControllerTest {
                     "description": "Lovely and strong dog. Really good football player!",
                     "age": 0,
                     "type": "DOG",
-                    "photoLink": "wwww.image.com"
+                    "photoLink": "https://www.hoidog.com"
                 }
                 """.trimIndent()
                 )
@@ -84,7 +86,7 @@ class PetControllerTest {
             .andExpect(jsonPath("$.description").value("Lovely and strong dog. Really good football player!"))
             .andExpect(jsonPath("$.age").value(0))
             .andExpect(jsonPath("$.type").value("DOG"))
-            .andExpect(jsonPath("$.photoLink").value("wwww.image.com"))
+            .andExpect(jsonPath("$.photoLink").value("https://www.hoidog.com"))
         }
 
     @Test
@@ -108,7 +110,7 @@ class PetControllerTest {
          .andReturn()
 
         val content = result.response.errorMessage
-        assertEquals(content,"Name must be at least 3 characters. Description must be at least 15 characters. Age must be at least 0.")
+        assertEquals(content,"Name must be at least 3 characters. Description must be at least 15 characters. Age must be at least 0. Image link should should start with http or https and not contain spaces.")
     }
 
     @Test
@@ -119,7 +121,7 @@ class PetControllerTest {
             age = 2,
             type = PetType.CAT,
             adopted = false,
-            photoLink = "www.hoicat.com"
+            photoLink = "https://www.hoicat.com"
         ).also(petRepository::save)
 
         val content = mockMvc.perform(
@@ -140,7 +142,7 @@ class PetControllerTest {
             age = 2,
             type = PetType.CAT,
             adopted = true,
-            photoLink = "www.hoicat.com"
+            photoLink = "https://www.hoicat.com"
         ).also(petRepository::save)
 
        val content =  mockMvc.perform(
@@ -159,7 +161,7 @@ class PetControllerTest {
             age = 2,
             type = PetType.CAT,
             adopted = true,
-            photoLink = "www.hoicat.com"
+            photoLink = "https://www.hoicat.com"
         ).also(petRepository::save)
 
     val id = ObjectId()
