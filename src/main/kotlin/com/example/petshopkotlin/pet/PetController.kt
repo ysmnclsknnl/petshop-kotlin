@@ -11,7 +11,7 @@ import org.springframework.web.server.ResponseStatusException
 @RestController
 @RequestMapping("/api/pets")
 class PetController(val petService: PetService) {
-    @RolesAllowed("ROLE_ADMIN", "ROLE_CUSTOMER")
+//    @RolesAllowed("ROLE_ADMIN", "ROLE_CUSTOMER")
     @GetMapping
     fun getPets(): ResponseEntity<List<Pet>> {
         try {

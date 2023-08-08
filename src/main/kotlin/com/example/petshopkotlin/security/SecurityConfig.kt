@@ -42,11 +42,15 @@ class SecurityConfig(val userDetailsService: UserDetailsService) {
             .csrf {
                 it.disable()
             }
+        .cors {
+            it.disable()
+        }
          .exceptionHandling {
              it.authenticationEntryPoint(HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
         }
             .authorizeHttpRequests {
-                it.requestMatchers("get", "/api/pets").hasAnyRole("ADMIN", "CUSTOMER")
+//                it.requestMatchers("get", "/api/pets").hasAnyRole("ADMIN", "CUSTOMER")
+                it.requestMatchers("get", "/api/pets").permitAll()
                 it.requestMatchers("post", "/api/pets").hasRole("ADMIN")
                 it.requestMatchers("patch", "/api/pets/{id}").hasRole("CUSTOMER")
                 it.requestMatchers("/api/auth/**").permitAll()
