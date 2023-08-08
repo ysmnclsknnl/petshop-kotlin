@@ -5,6 +5,7 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpStatus
 import org.springframework.security.authentication.AuthenticationManager
+import org.springframework.security.config.Customizer
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
@@ -14,6 +15,9 @@ import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.authentication.HttpStatusEntryPoint
+import org.springframework.web.cors.CorsConfiguration
+import org.springframework.web.cors.CorsConfigurationSource
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource
 
 @Configuration
 @EnableWebSecurity
@@ -38,24 +42,37 @@ class SecurityConfig(val userDetailsService: UserDetailsService) {
 
     @Bean
     @Throws(Exception::class)
-    fun filterChain(http: HttpSecurity): SecurityFilterChain  = http
-            .csrf {
-                it.disable()
-            }
-        .cors {
+    fun corsConfigurationSource(): CorsConfigurationSource {
+        val configuration = CorsConfiguration()
+        configuration.allowedOrigins = listOf("http://localhost:3000")
+        configuration.allowedMethods = listOf("GET", "POST", "PATCH", "DELETE", "PUT")
+        configuration.allowedHeaders = listOf("*")
+        configuration.allowCredentials = true
+        val source = UrlBasedCorsConfigurationSource()
+        source.registerCorsConfiguration("/**", configuration)
+        return source
+    }
+    @Bean
+    @Throws(Exception::class)
+    fun filterChain(http: HttpSecurity): SecurityFilterChain = http
+        .csrf {
             it.disable()
         }
-         .exceptionHandling {
-             it.authenticationEntryPoint(HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
+        .cors {
+            it.configurationSource(corsConfigurationSource())
         }
-            .authorizeHttpRequests {
-//                it.requestMatchers("get", "/api/pets").hasAnyRole("ADMIN", "CUSTOMER")
-                it.requestMatchers("get", "/api/pets").permitAll()
-                it.requestMatchers("post", "/api/pets").hasRole("ADMIN")
-                it.requestMatchers("patch", "/api/pets/{id}").hasRole("CUSTOMER")
-                it.requestMatchers("/api/auth/**").permitAll()
-            }
-            .sessionManagement{
-                it.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-            }.build()
+        .exceptionHandling {
+            it.authenticationEntryPoint(HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
+        }
+        .authorizeHttpRequests {
+            it.requestMatchers("get", "/api/pets").permitAll()
+            it.requestMatchers("post", "/api/pets").hasRole("ADMIN")
+            it.requestMatchers("patch", "/api/pets/{id}").hasRole("CUSTOMER")
+            it.requestMatchers("/api/auth/**").permitAll()
+        }
+        .sessionManagement {
+            it.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+        }
+        .httpBasic(Customizer.withDefaults())
+        .build()
     }
