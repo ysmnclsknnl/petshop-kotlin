@@ -18,8 +18,9 @@ class PetDataSeeder(val petRepository: PetRepository) : CommandLineRunner {
 
     private fun createPet(faker: Faker): Pet {
         val imageUrls = listOf(
-            "https://www.freepik.com/free-photo/cat-white-wall_9264445.htm?query=cat",
-            "https://unsplash.com/s/photos/cute-cat",
+            "https://i0.wp.com/deepgreenpermaculture.com/wp-content/uploads/2023/06/cat-relaxing-2000px.jpeg?fit=2000%2C1332&ssl=1",
+            "https://p1.pxfuel.com/preview/159/551/746/cat-baby-baby-cat-kitten-cat-cute-sweet.jpg",
+            "https://p0.pxfuel.com/preview/385/15/639/cute-mammal-cat-portrait.jpg"
         )
         return Pet(
             name = faker.cat().name(),
