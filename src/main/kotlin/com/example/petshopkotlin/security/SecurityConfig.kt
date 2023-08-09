@@ -65,7 +65,7 @@ class SecurityConfig(val userDetailsService: UserDetailsService) {
             it.authenticationEntryPoint(HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
         }
         .authorizeHttpRequests {
-            it.requestMatchers("get", "/api/pets").permitAll()
+            it.requestMatchers("/api/pets").hasAnyRole("ADMIN", "CUSTOMER")
             it.requestMatchers("post", "/api/pets").hasRole("ADMIN")
             it.requestMatchers("patch", "/api/pets/{id}").hasRole("CUSTOMER")
             it.requestMatchers("/api/auth/**").permitAll()
