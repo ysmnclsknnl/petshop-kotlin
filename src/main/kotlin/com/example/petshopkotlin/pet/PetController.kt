@@ -21,7 +21,7 @@ class PetController(val petService: PetService) {
         }
     }
 
-    @RolesAllowed("ROLE_ADMIN")
+//    @RolesAllowed("ROLE_ADMIN")
     @PostMapping
     fun createPet(@RequestBody pet: Pet): ResponseEntity<Pet> {
         try {
@@ -34,7 +34,7 @@ class PetController(val petService: PetService) {
         }
     }
 
-    @RolesAllowed("ROLE_CUSTOMER")
+//    @RolesAllowed("ROLE_CUSTOMER")
     @PatchMapping("/{id}")
     fun adoptPet(@PathVariable id: ObjectId): ResponseEntity<String> {
         try {
