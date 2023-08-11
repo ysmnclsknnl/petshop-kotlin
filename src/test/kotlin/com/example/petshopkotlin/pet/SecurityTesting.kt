@@ -8,6 +8,8 @@ import org.junit.jupiter.api.Test
 import org.mockito.ArgumentCaptor
 import org.mockito.BDDMockito.*
 import org.mockito.Mockito
+import org.mockito.kotlin.any
+import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
@@ -35,10 +37,8 @@ class SecurityTests {
     @MockBean
     private lateinit var userDetailsService: UserDetailsService
 
-    @WithAnonymousUser
-    @Test
-    fun givenUnauthenticatedUser_whenGetPet_thenUnauthorized() {
-        val pets = listOf(Pet(
+    private val pets1 = listOf(
+        Pet(
             name = "Tom",
             description = "Very fast cat. Loves eating fish.",
             age = 2,
@@ -46,15 +46,20 @@ class SecurityTests {
             adopted = true,
             photoLink = "www.foo.com",
         ),
-            Pet(
-                name = "Dog",
-                description = "Very fast dog. Loves eating meat.",
-                age = 2,
-                type = PetType.DOG,
-                adopted = true,
-                photoLink = "www.foo.com",
-            ),
-            )
+        Pet(
+            name = "Dog",
+            description = "Very fast dog. Loves eating meat.",
+            age = 2,
+            type = PetType.DOG,
+            adopted = true,
+            photoLink = "www.foo.com",
+        ),
+    )
+
+    @WithAnonymousUser
+    @Test
+    fun givenUnauthenticatedUser_whenGetPet_thenUnauthorized() {
+        val pets = pets1
 
         given(petService.getPets()).willReturn(pets)
 
@@ -65,23 +70,7 @@ class SecurityTests {
     @WithMockUser(roles = ["ADMIN"])
     @Test
     fun givenAdminUser_whenGetPet_thenSuccess() {
-        val pets = listOf(Pet(
-            name = "Tom",
-            description = "Very fast cat. Loves eating fish.",
-            age = 2,
-            type = PetType.CAT,
-            adopted = true,
-            photoLink = "www.foo.com",
-        ),
-            Pet(
-                name = "Dog",
-                description = "Very fast dog. Loves eating meat.",
-                age = 2,
-                type = PetType.DOG,
-                adopted = true,
-                photoLink = "www.foo.com",
-            ),
-        )
+        val pets = pets1
 
         given(petService.getPets()).willReturn(pets)
 
@@ -91,23 +80,7 @@ class SecurityTests {
     @WithMockUser(roles = ["CUSTOMER"])
     @Test
     fun givenCustomerUser_whenGetPet_thenSuccess() {
-        val pets = listOf(Pet(
-            name = "Tom",
-            description = "Very fast cat. Loves eating fish.",
-            age = 2,
-            type = PetType.CAT,
-            adopted = true,
-            photoLink = "www.foo.com",
-        ),
-            Pet(
-                name = "Dog",
-                description = "Very fast dog. Loves eating meat.",
-                age = 2,
-                type = PetType.DOG,
-                adopted = true,
-                photoLink = "www.foo.com",
-            ),
-        )
+        val pets = pets1
 
         given(petService.getPets()).willReturn(pets)
 
@@ -151,9 +124,8 @@ class SecurityTests {
             photoLink = "www.foo.com",
         )
 
-        val argumentCaptor = ArgumentCaptor.forClass(Pet::class.java)
-        given(petService.addPet(argumentCaptor.capture())).willThrow(IllegalArgumentException::class.java)
 
+        whenever(petService.addPet(any())).thenThrow(IllegalArgumentException::class.java)
         mvc.perform(
             post("/api/pets")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -162,7 +134,6 @@ class SecurityTests {
         )
             .andExpect(status().isBadRequest)
 
-        println(argumentCaptor.value)
 
     }
 

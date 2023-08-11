@@ -28,10 +28,10 @@ dependencies {
     testImplementation("org.springframework.security:spring-security-test:6.1.2")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     val testContainers = "1.18.1"
-    testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.testcontainers:testcontainers:$testContainers")
     testImplementation("org.testcontainers:mongodb:$testContainers")
     testImplementation("org.testcontainers:junit-jupiter:$testContainers")
+    testImplementation("org.mockito.kotlin:mockito-kotlin:5.1.0")
     implementation("net.datafaker:datafaker:2.0.1")
 }
 
