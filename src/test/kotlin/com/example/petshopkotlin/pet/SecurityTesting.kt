@@ -5,7 +5,9 @@ import com.example.petshopkotlin.pet.model.PetType
 import com.example.petshopkotlin.security.SecurityConfig
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.junit.jupiter.api.Test
+import org.mockito.ArgumentCaptor
 import org.mockito.BDDMockito.*
+import org.mockito.Mockito
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
@@ -136,6 +138,34 @@ class SecurityTests {
             .andExpect(status().isCreated)
     }
 
+    //given admin user if invalid pet return bad request
+    @WithMockUser(roles = ["ADMIN"])
+    @Test
+    fun givenAdminUser_WhenCreatePet_thenBadRequest() {
+        val pet = Pet(
+            name = "Tom",
+            description = "Very fast cat. Loves eating fish.",
+            age = 2,
+            type = PetType.CAT,
+            adopted = true,
+            photoLink = "www.foo.com",
+        )
+
+        val argumentCaptor = ArgumentCaptor.forClass(Pet::class.java)
+        given(petService.addPet(argumentCaptor.capture())).willThrow(IllegalArgumentException::class.java)
+
+        mvc.perform(
+            post("/api/pets")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(ObjectMapper().writeValueAsString(pet)
+                )
+        )
+            .andExpect(status().isBadRequest)
+
+        println(argumentCaptor.value)
+
+    }
+
     @WithMockUser(roles = ["CUSTOMER"])
     @Test
     fun givenOtherRolesExceptAdmin_whenCreatePet_thenForbidden() {
@@ -234,5 +264,7 @@ class SecurityTests {
             patch("/api/pets/${pet.id}"))
             .andExpect(status().isUnauthorized)
     }
+
+
 
 }

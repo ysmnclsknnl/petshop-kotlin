@@ -36,15 +36,11 @@ class PetController(val petService: PetService) {
 
     @RolesAllowed("ROLE_CUSTOMER")
     @PatchMapping("/{id}")
-    fun adoptPet(@PathVariable id: ObjectId): ResponseEntity<String> {
-        try {
-            return ResponseEntity.ok(petService.adoptPet(id))
-        } catch (ex: Exception) {
-            if (ex is IllegalArgumentException) {
-                throw ResponseStatusException(HttpStatus.BAD_REQUEST, ex.message)
-            }
+    fun adoptPet(@PathVariable id: ObjectId): ResponseEntity<String> = ResponseEntity.ok(petService.adoptPet(id))
 
-            throw ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, ex.message)
-        }
+
+    @ExceptionHandler(IllegalArgumentException::class)
+    fun handleIllegalArgument(ex: IllegalArgumentException): ResponseEntity<String> {
+        return ResponseEntity.badRequest().body(ex.message)
     }
 }

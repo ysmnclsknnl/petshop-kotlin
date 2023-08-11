@@ -7,5 +7,4 @@ import org.springframework.data.mongodb.repository.MongoRepository
 interface PetRepository : MongoRepository<Pet, ObjectId> {
     fun findAllByOrderByIdDesc(): List<Pet>?
 
-//    fun existsAllByIdAndAdoptedFalse(id: ObjectId): Boolean
 }

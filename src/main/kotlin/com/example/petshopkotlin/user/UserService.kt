@@ -7,12 +7,13 @@ import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.core.userdetails.UsernameNotFoundException
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.stereotype.Service
+import com.example.petshopkotlin.user.model.User as ModelUser
 
 @Service
 class UserService(
     @Autowired val userRepo: UserRepository,
 ) : UserDetailsService {
-    fun createUser(user: com.example.petshopkotlin.user.model.User): String {
+    fun createUser(user: ModelUser): String {
         require(!userRepo.existsByUserName(user.userName)) {"User with ${user.userName} already exists!"}
         val errors = validateUser(user)
         require(errors.isBlank()) {errors}
@@ -20,7 +21,7 @@ class UserService(
         val password = encryptPassword(user.password)
 
     return userRepo.save(
-        com.example.petshopkotlin.user.model.User(
+        ModelUser(
             userName = user.userName,
             password = password,
             role = user.role,
@@ -28,7 +29,7 @@ class UserService(
     ).username
     }
 
-    internal fun validateUser(user: com.example.petshopkotlin.user.model.User): String {
+    internal fun validateUser(user: ModelUser): String {
 
         val emailRegex = "^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}\$".toRegex()
         val passwordRegex = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@\$!%*?&])[A-Za-z\\d@\$!%*?&]{8,}$".toRegex()
@@ -42,7 +43,7 @@ class UserService(
     }
 
     @Throws(UsernameNotFoundException::class)
-    override fun loadUserByUsername(userName: String) = userRepo.findUserByUsername(userName)?.let {
+    override fun loadUserByUsername(userName: String) :User? = userRepo.findUserByUsername(userName)?.let {
         User(it.username, it.password, listOf(GrantedAuthority { "ROLE_${it.role.name}" }))
     }
 
