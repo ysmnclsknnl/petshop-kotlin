@@ -34,16 +34,19 @@ class PetControllerTest {
         petRepository.deleteAll()
     }
 
+    private val validPet = Pet(
+        name = "Tom",
+        description = "Very fast cat. Loves eating fish.",
+        age = 2,
+        type = PetType.CAT,
+        adopted = false,
+        photoLink = "https://www.foo.com",
+    )
+
     @Test
     fun getPets() {
         val pets = listOf(
-            Pet(
-                name = "Tom",
-                description = "Fast cat. Loves running behind Jerry",
-                age = 2,
-                type = PetType.CAT,
-                photoLink = "https://www.hoicat.com"
-            ),
+          validPet,
             Pet(
                 name = "Cotton",
                 description = "Cute dog. Likes to play fetch",
@@ -70,59 +73,43 @@ class PetControllerTest {
             post("/api/pets")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(
-                    """
-                {
-                    "name": "Amsterdam",
-                    "description": "Lovely and strong dog. Really good football player!",
-                    "age": 0,
-                    "type": "DOG",
-                    "photoLink": "https://www.hoidog.com"
-                }
-                """.trimIndent()
+               validPet.toJson()
                 )
         )
             .andExpect(status().isCreated)
-            .andExpect(jsonPath("$.name").value("Amsterdam"))
-            .andExpect(jsonPath("$.description").value("Lovely and strong dog. Really good football player!"))
-            .andExpect(jsonPath("$.age").value(0))
-            .andExpect(jsonPath("$.type").value("DOG"))
-            .andExpect(jsonPath("$.photoLink").value("https://www.hoidog.com"))
+            .andExpect(jsonPath("$.name").value(validPet.name))
+            .andExpect(jsonPath("$.description").value(validPet.description))
+            .andExpect(jsonPath("$.age").value(validPet.age))
+            .andExpect(jsonPath("$.type").value(validPet.type.toString()))
+            .andExpect(jsonPath("$.photoLink").value(validPet.photoLink))
         }
 
     @Test
     fun `createPet should return status BadRequest when pet is invalid `() {
-     val result = mockMvc.perform(
+        val invalidPet = Pet(
+            name = "As",
+            description = "Lovely !",
+            age = -1,
+            type = PetType.DOG,
+            photoLink = "wwww.image.com"
+        )
+
+     val content = mockMvc.perform(
             post("/api/pets")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(
-                    """
-                {
-                    "name": "As",
-                    "description": "Lovely !",
-                    "age": -1,
-                    "type": "DOG",
-                    "photoLink": "wwww.image.com"
-                }
-                """.trimIndent()
-                )
+                .content(invalidPet.toJson())
         )
             .andExpect(status().isBadRequest)
          .andReturn()
+         .response
+         .errorMessage
 
-        val content = result.response.errorMessage
         assertEquals(content,"Name must be at least 3 characters. Description must be at least 15 characters. Age must be at least 0. Image link should should start with http or https and not contain spaces.")
     }
 
     @Test
     fun `adoptPet should return a success message along with status ok, when pet id is valid and pet is not adopted`() {
-        val pet = Pet(
-            name = "Tom",
-            description = "Fast cat. Loves running behind Jerry",
-            age = 2,
-            type = PetType.CAT,
-            adopted = false,
-            photoLink = "https://www.hoicat.com"
-        ).also(petRepository::save)
+    val pet = petRepository.save(validPet.copy(adopted = false))
 
         val content = mockMvc.perform(
             patch("/api/pets/${pet.id}"))
@@ -136,34 +123,22 @@ class PetControllerTest {
 
     @Test
     fun `adoptPet should return an error message along with status BadRequest, when pet is adopted`() {
-        val pet = Pet(
-            name = "Tom",
-            description = "Fast cat. Loves running behind Jerry",
-            age = 2,
-            type = PetType.CAT,
-            adopted = true,
-            photoLink = "https://www.hoicat.com"
-        ).also(petRepository::save)
+        val adoptedPet = validPet
+            .copy(adopted = true)
+            .also (petRepository::save)
 
        val content =  mockMvc.perform(
-            patch("/api/pets/${pet.id}"))
+            patch("/api/pets/${adoptedPet.id}"))
             .andExpect(status().isBadRequest)
-           .andReturn().response.errorMessage
+           .andReturn()
+           .response
+           .contentAsString
 
-        assertEquals(content, "Pet with ID: ${pet.id} is already adopted")
+        assertEquals(content, "Pet with ID: ${adoptedPet.id} is already adopted")
     }
 
     @Test
     fun `adoptPet should return an error message along with status BadRequest, when pet doesn't exist`() {
-        Pet(
-            name = "Tom",
-            description = "Fast cat. Loves running behind Jerry",
-            age = 2,
-            type = PetType.CAT,
-            adopted = true,
-            photoLink = "https://www.hoicat.com"
-        ).also(petRepository::save)
-
     val id = ObjectId()
 
      val content = mockMvc.perform(
@@ -171,7 +146,7 @@ class PetControllerTest {
             .andExpect(status().isBadRequest)
          .andReturn()
          .response
-         .errorMessage
+         .contentAsString
 
         assertEquals(content,"Pet with ID: $id doesn't exist")
     }

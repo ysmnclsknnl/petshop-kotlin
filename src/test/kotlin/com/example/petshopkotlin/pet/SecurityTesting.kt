@@ -5,11 +5,8 @@ import com.example.petshopkotlin.pet.model.PetType
 import com.example.petshopkotlin.security.SecurityConfig
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.junit.jupiter.api.Test
-import org.mockito.ArgumentCaptor
-import org.mockito.BDDMockito.*
-import org.mockito.Mockito
+import org.mockito.BDDMockito.given
 import org.mockito.kotlin.any
-import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
@@ -37,30 +34,29 @@ class SecurityTests {
     @MockBean
     private lateinit var userDetailsService: UserDetailsService
 
-    private val pets1 = listOf(
-        Pet(
-            name = "Tom",
-            description = "Very fast cat. Loves eating fish.",
-            age = 2,
-            type = PetType.CAT,
-            adopted = true,
-            photoLink = "www.foo.com",
-        ),
-        Pet(
+    private val validPet = Pet(
+        name = "Tom",
+        description = "Very fast cat. Loves eating fish.",
+        age = 2,
+        type = PetType.CAT,
+        adopted = true,
+        photoLink = "https://www.foo.com",
+    )
+
+    private val pets = listOf(
+        validPet,
+        validPet.copy(
             name = "Dog",
             description = "Very fast dog. Loves eating meat.",
-            age = 2,
             type = PetType.DOG,
-            adopted = true,
-            photoLink = "www.foo.com",
-        ),
+            )
     )
+
+    private val validPetJson = validPet.toJson()
 
     @WithAnonymousUser
     @Test
-    fun givenUnauthenticatedUser_whenGetPet_thenUnauthorized() {
-        val pets = pets1
-
+    fun `given unauthenticated user when getPets then Unauthorized`() {
         given(petService.getPets()).willReturn(pets)
 
         mvc.perform(get("/api/pets"))
@@ -69,19 +65,16 @@ class SecurityTests {
 
     @WithMockUser(roles = ["ADMIN"])
     @Test
-    fun givenAdminUser_whenGetPet_thenSuccess() {
-        val pets = pets1
-
+    fun `given Admin user when getPets then Success`() {
         given(petService.getPets()).willReturn(pets)
 
         mvc.perform(get("/api/pets"))
             .andExpect(status().isOk)
     }
+
     @WithMockUser(roles = ["CUSTOMER"])
     @Test
-    fun givenCustomerUser_whenGetPet_thenSuccess() {
-        val pets = pets1
-
+    fun `given Customer user when getPets then Success`() {
         given(petService.getPets()).willReturn(pets)
 
         mvc.perform(get("/api/pets"))
@@ -90,152 +83,90 @@ class SecurityTests {
 
     @WithMockUser(roles = ["ADMIN"])
     @Test
-    fun givenAdminUser_WhenCreatePet_thenCreated() {
-        val pet = Pet(
-            name = "Tom",
-            description = "Very fast cat. Loves eating fish.",
-            age = 2,
-            type = PetType.CAT,
-            adopted = true,
-            photoLink = "www.foo.com",
-        )
-
-        given(petService.addPet(pet)).willReturn(pet)
+    fun `given Admin user when createPet then Created`() {
+        given(petService.addPet(any())).willReturn(validPet)
 
         mvc.perform(
             post("/api/pets")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(ObjectMapper().writeValueAsString(pet)
-                )
+                .content(validPetJson)
         )
             .andExpect(status().isCreated)
     }
 
-    //given admin user if invalid pet return bad request
     @WithMockUser(roles = ["ADMIN"])
     @Test
-    fun givenAdminUser_WhenCreatePet_thenBadRequest() {
-        val pet = Pet(
-            name = "Tom",
-            description = "Very fast cat. Loves eating fish.",
-            age = 2,
-            type = PetType.CAT,
-            adopted = true,
-            photoLink = "www.foo.com",
+    fun `given Admin user when createPet then BadRequest`() {
+        val invalidPet = validPet.copy(
+            age = -1,
         )
 
-
-        whenever(petService.addPet(any())).thenThrow(IllegalArgumentException::class.java)
+        given(petService.addPet(any())).willThrow(IllegalArgumentException::class.java)
         mvc.perform(
             post("/api/pets")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(ObjectMapper().writeValueAsString(pet)
+                .content(invalidPet.toJson()
                 )
         )
             .andExpect(status().isBadRequest)
-
-
     }
 
     @WithMockUser(roles = ["CUSTOMER"])
     @Test
-    fun givenOtherRolesExceptAdmin_whenCreatePet_thenForbidden() {
+    fun `given authenticated users with roles except Admin when createPet then Forbidden`() {
+        given(petService.addPet(any())).willReturn(validPet)
+
         mvc.perform(
             post("/api/pets")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(
-                    """
-                {
-                    "name": "Amsterdam",
-                    "description": "Lovely and strong dog. Really good football player!",
-                    "age": 0,
-                    "type": "DOG",
-                    "photoLink": "wwww.image.com"
-                }
-                """.trimIndent()
-                )
+                .content(validPetJson)
         )
             .andExpect(status().isForbidden)
     }
 
     @WithAnonymousUser
     @Test
-    fun givenUnauthenticatedUser_whenCreatePet_thenUnauthorized() {
+    fun `given unauthenticated user when createPet then Unauthorized`() {
+        given(petService.addPet(any())).willReturn(validPet)
+
         mvc.perform(
             post("/api/pets")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(
-                    """
-                {
-                    "name": "Amsterdam",
-                    "description": "Lovely and strong dog. Really good football player!",
-                    "age": 0,
-                    "type": "DOG",
-                    "photoLink": "wwww.image.com"
-                }
-                """.trimIndent()
-                )
+                .content(validPetJson)
         )
             .andExpect(status().isUnauthorized)
     }
 
     @WithMockUser(roles = ["CUSTOMER"])
     @Test
-    fun givenCustomerUser_whenAdoptPet_thenSuccess() {
-        val pet = Pet(
-            name = "Tom",
-            description = "Very fast cat. Loves eating fish.",
-            age = 2,
-            type = PetType.CAT,
-            adopted = true,
-            photoLink = "www.foo.com",
-        )
-
-        given(petService.adoptPet(pet.id)).willReturn("You successfully adopted ${pet.name}!")
+    fun `given Customer user when adoptPet then Success`() {
+        given(petService.adoptPet(validPet.id)).willReturn("You successfully adopted ${validPet.name}!")
 
         mvc.perform(
-            patch("/api/pets/${pet.id}")
+            patch("/api/pets/${validPet.id}")
         )
             .andExpect(status().isOk)
     }
+
     @WithMockUser(roles = ["ADMIN"])
     @Test
-    fun givenUsersWithRolesExceptCustomer_whenAdoptPet_thenForbidden() {
-        val pet = Pet(
-            name = "Tom",
-            description = "Very fast cat. Loves eating fish.",
-            age = 2,
-            type = PetType.CAT,
-            adopted = true,
-            photoLink = "www.foo.com",
-        )
-
-        given(petService.adoptPet(pet.id)).willReturn("You successfully adopted ${pet.name}!")
+    fun `given authenticated users with roles except customer when adoptPet then Forbidden`() {
+        given(petService.adoptPet(validPet.id)).willReturn("You successfully adopted ${validPet.name}!")
 
         mvc.perform(
-            patch("/api/pets/${pet.id}"))
+            patch("/api/pets/${validPet.id}"))
             .andExpect(status().isForbidden)
     }
 
     @WithAnonymousUser
     @Test
-    fun givenUnauthenticatedUser_whenAdoptPet_thenUnauthorized() {
-        val pet = Pet(
-            name = "Tom",
-            description = "Very fast cat. Loves eating fish.",
-            age = 2,
-            type = PetType.CAT,
-            adopted = true,
-            photoLink = "www.foo.com",
-        )
-
-        given(petService.adoptPet(pet.id)).willReturn("You successfully adopted ${pet.name}!")
+    fun `given unauthenticated user when adoptPet then Unauthorized`() {
+        given(petService.adoptPet(validPet.id)).willReturn("You successfully adopted ${validPet.name}!")
 
         mvc.perform(
-            patch("/api/pets/${pet.id}"))
+            patch("/api/pets/${validPet.id}"))
             .andExpect(status().isUnauthorized)
     }
-
-
-
 }
+
+internal fun Pet.toJson(): String = ObjectMapper().writeValueAsString(this)
