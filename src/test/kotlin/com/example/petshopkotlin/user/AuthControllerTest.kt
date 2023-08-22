@@ -2,6 +2,7 @@ package com.example.petshopkotlin.user
 
 import com.example.petshopkotlin.user.model.Role
 import com.example.petshopkotlin.user.model.User
+import com.fasterxml.jackson.databind.ObjectMapper
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -9,8 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.MediaType
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.MockMvc
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import org.testcontainers.junit.jupiter.Testcontainers
 
@@ -36,7 +37,7 @@ class AuthControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(
                     """
-                            {
+                         {
                               "userName": "fake_admin123@example.com",
                                "password": "1234567Ab$",
                                "role": "ADMIN"
@@ -119,28 +120,32 @@ class AuthControllerTest {
     }
 
     @Test
-    fun login() {
-        User(
-            userName = "fake_user123@example.com",
+    fun `given valid credentials when login then Success along with username`() {
+        val user = User(
+            userName = "fake_user128@example.com",
             password = "1234567Ab$",
             role = Role.ADMIN,
         ).also(userRepository::save)
 
-        mockMvc.perform(
+        println(userRepository.findUserByUsername(user.userName))
+        val loginDto = LoginDto(
+            userName = user.userName,
+            password = user.password,
+        )
+        val content = mockMvc.perform(
             post("/api/auth/login")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(
-                    """
-                            {
-                              "userName": "fake_user123@example.com",
-                               "password": "1234567Ab$"
-                            }
-                            """.trimIndent()
+                    ObjectMapper().writeValueAsString(loginDto)
                 )
         )
             .andExpect(
                 status().isOk
             )
             .andReturn()
+            .response
+            .contentAsString
+
+        assertEquals(content, user.username)
     }
 }

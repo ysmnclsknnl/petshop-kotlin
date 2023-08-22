@@ -42,9 +42,19 @@ class UserService(
         ).joinToString(" ")
     }
 
-    @Throws(UsernameNotFoundException::class)
     override fun loadUserByUsername(userName: String): User? = userRepo.findUserByUsername(userName)?.let {
         User(it.username, it.password, listOf(GrantedAuthority { "ROLE_${it.role.name}" }))
+    }
+
+    fun login(loginCredentials: LoginDto): String {
+        val user = userRepo.findUserByUsername(loginCredentials.userName)
+            ?: throw UsernameNotFoundException("User with ${loginCredentials.userName} not found!")
+
+        return if (BCryptPasswordEncoder().matches(loginCredentials.password, user.password)) {
+            user.userName
+        } else {
+            throw UsernameNotFoundException("Invalid credentials!")
+        }
     }
 
     private fun encryptPassword(password: String) = BCryptPasswordEncoder().encode(password)

@@ -2,6 +2,7 @@ package com.example.petshopkotlin
 
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.AuthorizationServiceException
+import org.springframework.security.core.userdetails.UsernameNotFoundException
 import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.client.HttpServerErrorException.InternalServerError
@@ -23,6 +24,11 @@ class GlobalExceptionHandler {
     fun handleAuthorizationException(ex: AuthorizationServiceException) = ResponseEntity
         .status(403)
         .body("You are not authorized to perform this action")
+
+    @ExceptionHandler(UsernameNotFoundException::class)
+    fun handleUsernameException(ex: UsernameNotFoundException) = ResponseEntity
+        .status(404)
+        .body(ex.message)
 
     @ExceptionHandler(InternalServerError::class)
     fun handleException(ex: Exception) = ResponseEntity

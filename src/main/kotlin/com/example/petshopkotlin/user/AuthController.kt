@@ -20,6 +20,5 @@ class AuthController(private val userService: UserService) {
         )
 
     @PostMapping("/login")
-    fun login(@RequestBody username: String) = userService
-        .loadUserByUsername(username)?.let { ResponseEntity.ok(it) }
+    fun login(@RequestBody loginCredentials: LoginDto) = userService.login(loginCredentials)
 }
