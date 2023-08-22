@@ -89,7 +89,7 @@ class AuthControllerTest {
     }
 
     @Test
-    fun givenExistingUserName_whenRegister_thenBadRequest() {
+    fun `given an existing username when register then BadRequest`() {
         val user = User(
             userName = "fake_user123@example.com",
             password = "1234567Ab$",
