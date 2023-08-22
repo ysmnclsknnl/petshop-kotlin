@@ -24,7 +24,7 @@ import org.testcontainers.junit.jupiter.Testcontainers
 @ImportAutoConfiguration(SecurityOff::class)
 class PetControllerTest {
     @Autowired
-    lateinit var mockMvc : MockMvc
+    lateinit var mockMvc: MockMvc
 
     @Autowired
     lateinit var petRepository: PetRepository
@@ -46,7 +46,7 @@ class PetControllerTest {
     @Test
     fun getPets() {
         val pets = listOf(
-          validPet,
+            validPet,
             Pet(
                 name = "Cotton",
                 description = "Cute dog. Likes to play fetch",
@@ -57,32 +57,81 @@ class PetControllerTest {
         ).also(petRepository::saveAll)
 
         mockMvc.perform(
-            get("/api/pets"))
-            .andExpect(status().isOk)
-            .andExpect(jsonPath("$.length()").value(pets.size))
-            .andExpect(jsonPath("$[*].name", Matchers.containsInAnyOrder(pets[0].name, pets[1].name)))
-            .andExpect(jsonPath("$[*].age", Matchers.containsInAnyOrder(pets[0].age, pets[1].age)))
-            .andExpect(jsonPath("$[*].description", Matchers.containsInAnyOrder(pets[0].description, pets[1].description)))
-            .andExpect(jsonPath("$[*].type", Matchers.containsInAnyOrder(pets[0].type.toString(), pets[1].type.toString())))
-            .andExpect(jsonPath("$[*].photoLink", Matchers.containsInAnyOrder(pets[0].photoLink, pets[1].photoLink)))
+            get("/api/pets")
+        )
+            .andExpect(
+                status().isOk
+            )
+            .andExpect(
+                jsonPath(
+                    "$.length()", Matchers.equalTo(pets.size)
+                )
+            )
+            .andExpect(
+                jsonPath(
+                    "$[*].name", Matchers.containsInAnyOrder(pets[0].name, pets[1].name)
+                )
+            )
+            .andExpect(
+                jsonPath(
+                    "$[*].age", Matchers.containsInAnyOrder(pets[0].age, pets[1].age)
+                )
+            )
+            .andExpect(
+                jsonPath(
+                    "$[*].description", Matchers.containsInAnyOrder(pets[0].description, pets[1].description)
+                )
+            )
+            .andExpect(
+                jsonPath(
+                    "$[*].type", Matchers.containsInAnyOrder(pets[0].type.toString(), pets[1].type.toString())
+                )
+            )
+            .andExpect(
+                jsonPath(
+                    "$[*].photoLink", Matchers.containsInAnyOrder(pets[0].photoLink, pets[1].photoLink)
+                )
+            )
     }
 
-        @Test
-        fun `createPet should return a pet along with status created when pet is valid`() {
+    @Test
+    fun `createPet should return a pet along with status created when pet is valid`() {
         mockMvc.perform(
             post("/api/pets")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(
-               validPet.toJson()
+                    validPet.toJson()
                 )
         )
-            .andExpect(status().isCreated)
-            .andExpect(jsonPath("$.name").value(validPet.name))
-            .andExpect(jsonPath("$.description").value(validPet.description))
-            .andExpect(jsonPath("$.age").value(validPet.age))
-            .andExpect(jsonPath("$.type").value(validPet.type.toString()))
-            .andExpect(jsonPath("$.photoLink").value(validPet.photoLink))
-        }
+            .andExpect(
+                status().isCreated
+            )
+            .andExpect(
+                jsonPath(
+                    "$.name", Matchers.equalTo(validPet.name)
+                )
+            )
+            .andExpect(
+                jsonPath(
+                    "$.description", Matchers.equalTo(validPet.description)
+                )
+            )
+            .andExpect(
+                jsonPath(
+                    "$.age", Matchers.equalTo(validPet.age)
+                )
+            )
+            .andExpect(
+                jsonPath(
+                    "$.type", Matchers.equalTo(validPet.type.toString())
+                )
+            )
+            .andExpect(
+                jsonPath(
+                    "$.photoLink", Matchers.equalTo(validPet.photoLink)
+                )
+            )
+    }
 
     @Test
     fun `createPet should return status BadRequest when pet is invalid `() {
@@ -91,29 +140,43 @@ class PetControllerTest {
             description = "Lovely !",
             age = -1,
             type = PetType.DOG,
-            photoLink = "wwww.image.com"
+            photoLink = "www.image.com"
         )
 
-     val content = mockMvc.perform(
+        val content = mockMvc.perform(
             post("/api/pets")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(invalidPet.toJson())
+                .contentType(
+                    MediaType.APPLICATION_JSON
+                )
+                .content(
+                    invalidPet.toJson()
+                )
         )
-            .andExpect(status().isBadRequest)
-         .andReturn()
-         .response
-         .errorMessage
+            .andExpect(
+                status().isBadRequest
+            )
+            .andReturn()
+            .response
+            .contentAsString
 
-        assertEquals(content,"Name must be at least 3 characters. Description must be at least 15 characters. Age must be at least 0. Image link should should start with http or https and not contain spaces.")
+        assertEquals(
+            content,
+            "Name must be at least 3 characters. Description must be at least 15 characters. Age must be at least 0. Image link should should start with http or https and not contain spaces."
+        )
     }
 
     @Test
     fun `adoptPet should return a success message along with status ok, when pet id is valid and pet is not adopted`() {
-    val pet = petRepository.save(validPet.copy(adopted = false))
+        val pet = petRepository.save(validPet.copy(adopted = false))
 
         val content = mockMvc.perform(
-            patch("/api/pets/${pet.id}"))
-            .andExpect(status().isOk)
+            patch(
+                "/api/pets/${pet.id}"
+            )
+        )
+            .andExpect(
+                status().isOk
+            )
             .andReturn()
             .response
             .contentAsString
@@ -125,30 +188,33 @@ class PetControllerTest {
     fun `adoptPet should return an error message along with status BadRequest, when pet is adopted`() {
         val adoptedPet = validPet
             .copy(adopted = true)
-            .also (petRepository::save)
+            .also(petRepository::save)
 
-       val content =  mockMvc.perform(
-            patch("/api/pets/${adoptedPet.id}"))
+        val content = mockMvc.perform(
+            patch("/api/pets/${adoptedPet.id}")
+        )
             .andExpect(status().isBadRequest)
-           .andReturn()
-           .response
-           .contentAsString
+            .andReturn()
+            .response
+            .contentAsString
 
         assertEquals(content, "Pet with ID: ${adoptedPet.id} is already adopted")
     }
 
     @Test
     fun `adoptPet should return an error message along with status BadRequest, when pet doesn't exist`() {
-    val id = ObjectId()
+        val id = ObjectId()
 
-     val content = mockMvc.perform(
-            patch("/api/pets/${id}"))
-            .andExpect(status().isBadRequest)
-         .andReturn()
-         .response
-         .contentAsString
+        val content = mockMvc.perform(
+            patch("/api/pets/${id}")
+        )
+            .andExpect(
+                status().isBadRequest
+            )
+            .andReturn()
+            .response
+            .contentAsString
 
-        assertEquals(content,"Pet with ID: $id doesn't exist")
+        assertEquals(content, "Pet with ID: $id doesn't exist")
     }
-
 }

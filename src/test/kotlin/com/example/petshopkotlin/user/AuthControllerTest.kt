@@ -19,61 +19,66 @@ import org.testcontainers.junit.jupiter.Testcontainers
 @Testcontainers
 class AuthControllerTest {
     @Autowired
-    lateinit var mockMvc : MockMvc
+    lateinit var mockMvc: MockMvc
 
     @Autowired
     lateinit var userRepository: UserRepository
-
 
     @BeforeEach
     fun setUp() {
         userRepository.deleteAll()
     }
 
-        @Test
-        fun givenValidUser_whenRegister_thenSuccess() {
-          val result = mockMvc.perform(
-                post("/api/auth")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(
-                        """
-                            {
-                              "userName": "aaa@gmail.com",
-                               "password": "1234567Ab$",
-                               "role": "CUSTOMER"
-                            }
-                            """.trimIndent()
-                    )
-          )
-                .andExpect(status().isCreated)
-              .andReturn()
-
-            val content = result.response.contentAsString
-            assertEquals(content,"aaa@gmail.com" )
-
-            val savedUser = userRepository.findUserByUsername("aaa@gmail.com")
-            assertEquals(savedUser?.userName ,  "aaa@gmail.com" )
-        }
-
     @Test
-    fun givenInvalidUserName_whenRegister_thenBadRequest() {
-        val result = mockMvc.perform(
+    fun `given valid user when register then Success along with userName`() {
+        val content = mockMvc.perform(
             post("/api/auth")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(
                     """
                             {
-                              "userName": "aagmail.com",
+                              "userName": "fake_admin123@example.com",
+                               "password": "1234567Ab$",
+                               "role": "ADMIN"
+                            }
+                            """.trimIndent()
+                )
+        )
+            .andExpect(
+                status().isCreated
+            )
+            .andReturn()
+            .response
+            .contentAsString
+
+        assertEquals(content, "fake_admin123@example.com")
+
+        val savedUser = userRepository.findUserByUsername("fake_admin123@example.com")
+        assertEquals(savedUser?.userName, "fake_admin123@example.com")
+    }
+
+    @Test
+    fun `given invalid userName when register then BadRequest`() {
+        val content = mockMvc.perform(
+            post("/api/auth")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(
+                    """
+                            {
+                              "userName": "example.com",
                                "password": "123456",
                                "role": "CUSTOMER"
                             }
                             """.trimIndent()
                 )
         )
-            .andExpect(status().isBadRequest)
+            .andExpect(
+                status().isBadRequest
+            )
             .andReturn()
+            .response
+            .contentAsString
 
-        val content = result.response.errorMessage
         val errors = listOf(
             "Email address should consist of numbers, letters, and '.', '-', '_' symbols.",
             "Password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one digit, and one special symbol @$!%*?&"
@@ -85,53 +90,57 @@ class AuthControllerTest {
     @Test
     fun givenExistingUserName_whenRegister_thenBadRequest() {
         val user = User(
-            userName = "aaa@gmail.com",
+            userName = "fake_user123@example.com",
             password = "1234567Ab$",
-            role = Role.CUSTOMER,
+            role = Role.ADMIN,
         ).also(userRepository::save)
 
-        val result = mockMvc.perform(
+        val content = mockMvc.perform(
             post("/api/auth")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(
                     """
                             {
-                              "userName": "aaa@gmail.com",
+                              "userName": "fake_user123@example.com",
                                "password": "1234567Ab$",
-                               "role": "CUSTOMER"
+                               "role": "ADMIN"
                             }
                             """.trimIndent()
                 )
         )
-            .andExpect(status().isBadRequest)
+            .andExpect(
+                status().isBadRequest
+            )
             .andReturn()
-
-        val content = result.response.errorMessage
+            .response
+            .contentAsString
 
         assertEquals(content, "User with ${user.userName} already exists!")
     }
 
     @Test
     fun login() {
-        val user = User(
-            userName = "aaa@gmail.com",
+        User(
+            userName = "fake_user123@example.com",
             password = "1234567Ab$",
-            role = Role.CUSTOMER,
+            role = Role.ADMIN,
         ).also(userRepository::save)
 
-        val result = mockMvc.perform(
+        mockMvc.perform(
             post("/api/auth/login")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(
                     """
                             {
-                              "userName": "aaa@gmail.com",
+                              "userName": "fake_user123@example.com",
                                "password": "1234567Ab$"
                             }
                             """.trimIndent()
                 )
         )
-            .andExpect(status().isOk)
+            .andExpect(
+                status().isOk
+            )
             .andReturn()
     }
 }
