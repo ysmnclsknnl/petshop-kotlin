@@ -21,6 +21,7 @@ class UserServiceTest {
         password = "1234567Ab%",
         role = Role.CUSTOMER
     )
+
     @Test
     fun `validateUser should return empty string when user is valid`() {
         val validationResult = userService.validateUser(validUser)

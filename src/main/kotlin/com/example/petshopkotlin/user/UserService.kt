@@ -14,19 +14,19 @@ class UserService(
     @Autowired val userRepo: UserRepository,
 ) : UserDetailsService {
     fun createUser(user: ModelUser): String {
-        require(!userRepo.existsByUserName(user.userName)) {"User with ${user.userName} already exists!"}
+        require(!userRepo.existsByUserName(user.userName)) { "User with ${user.userName} already exists!" }
         val errors = validateUser(user)
-        require(errors.isBlank()) {errors}
+        require(errors.isBlank()) { errors }
 
         val password = encryptPassword(user.password)
 
-    return userRepo.save(
-        ModelUser(
-            userName = user.userName,
-            password = password,
-            role = user.role,
-        ),
-    ).username
+        return userRepo.save(
+            ModelUser(
+                userName = user.userName,
+                password = password,
+                role = user.role,
+            ),
+        ).username
     }
 
     internal fun validateUser(user: ModelUser): String {
@@ -39,13 +39,13 @@ class UserService(
                 ?.let { "Email address should consist of numbers, letters, and '.', '-', '_' symbols." },
             user.password.takeIf { !it.matches(passwordRegex) }
                 ?.let { "Password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one digit, and one special symbol @$!%*?&" }
-        ).joinToString (" ")
+        ).joinToString(" ")
     }
 
     @Throws(UsernameNotFoundException::class)
-    override fun loadUserByUsername(userName: String) :User? = userRepo.findUserByUsername(userName)?.let {
+    override fun loadUserByUsername(userName: String): User? = userRepo.findUserByUsername(userName)?.let {
         User(it.username, it.password, listOf(GrantedAuthority { "ROLE_${it.role.name}" }))
     }
 
- private fun encryptPassword(password: String) = BCryptPasswordEncoder().encode(password)
+    private fun encryptPassword(password: String) = BCryptPasswordEncoder().encode(password)
 }

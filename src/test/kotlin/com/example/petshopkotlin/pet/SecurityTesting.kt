@@ -45,11 +45,13 @@ class SecurityTests {
 
     private val pets = listOf(
         validPet,
-        validPet.copy(
-            name = "Dog",
-            description = "Very fast dog. Loves eating meat.",
+        Pet(
+            name = "Cotton",
+            description = "Cute dog. Likes to play fetch",
+            age = 3,
             type = PetType.DOG,
-            )
+            photoLink = "https://www.hoidog.com"
+        ),
     )
 
     private val validPetJson = validPet.toJson()
@@ -57,41 +59,59 @@ class SecurityTests {
     @WithAnonymousUser
     @Test
     fun `given unauthenticated user when getPets then Unauthorized`() {
-        given(petService.getPets()).willReturn(pets)
+        given(
+            petService.getPets()
+        ).willReturn(pets)
 
         mvc.perform(get("/api/pets"))
-            .andExpect(status().isUnauthorized)
+            .andExpect(
+                status().isUnauthorized
+            )
     }
 
     @WithMockUser(roles = ["ADMIN"])
     @Test
     fun `given Admin user when getPets then Success`() {
-        given(petService.getPets()).willReturn(pets)
+        given(
+            petService.getPets()
+        ).willReturn(pets)
 
         mvc.perform(get("/api/pets"))
-            .andExpect(status().isOk)
+            .andExpect(
+                status().isOk
+            )
     }
 
     @WithMockUser(roles = ["CUSTOMER"])
     @Test
     fun `given Customer user when getPets then Success`() {
-        given(petService.getPets()).willReturn(pets)
+        given(
+            petService.getPets()
+        ).willReturn(pets)
 
         mvc.perform(get("/api/pets"))
-            .andExpect(status().isOk)
+            .andExpect(
+                status().isOk
+            )
     }
 
     @WithMockUser(roles = ["ADMIN"])
     @Test
     fun `given Admin user when createPet then Created`() {
-        given(petService.addPet(any())).willReturn(validPet)
+        given(
+            petService.addPet(any())
+        ).willReturn(validPet)
 
         mvc.perform(
             post("/api/pets")
-                .contentType(MediaType.APPLICATION_JSON)
+                .contentType(
+                    MediaType.APPLICATION_JSON
+                )
                 .content(validPetJson)
         )
-            .andExpect(status().isCreated)
+            .andExpect(
+                status().isCreated
+            )
     }
 
     @WithMockUser(roles = ["ADMIN"])
@@ -101,46 +121,68 @@ class SecurityTests {
             age = -1,
         )
 
-        given(petService.addPet(any())).willThrow(IllegalArgumentException::class.java)
+        given(
+            petService.addPet(any())
+        ).willThrow(IllegalArgumentException::class.java)
+
         mvc.perform(
             post("/api/pets")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(invalidPet.toJson()
+                .contentType(
+                    MediaType.APPLICATION_JSON
+                )
+                .content(
+                    invalidPet.toJson()
                 )
         )
-            .andExpect(status().isBadRequest)
+            .andExpect(
+                status().isBadRequest
+            )
     }
 
     @WithMockUser(roles = ["CUSTOMER"])
     @Test
     fun `given authenticated users with roles except Admin when createPet then Forbidden`() {
-        given(petService.addPet(any())).willReturn(validPet)
+        given(
+            petService.addPet(any())
+        ).willReturn(validPet)
 
         mvc.perform(
             post("/api/pets")
-                .contentType(MediaType.APPLICATION_JSON)
+                .contentType(
+                    MediaType.APPLICATION_JSON
+                )
                 .content(validPetJson)
         )
-            .andExpect(status().isForbidden)
+            .andExpect(
+                status().isForbidden
+            )
     }
 
     @WithAnonymousUser
     @Test
     fun `given unauthenticated user when createPet then Unauthorized`() {
-        given(petService.addPet(any())).willReturn(validPet)
+        given(
+            petService.addPet(any())
+        ).willReturn(validPet)
 
         mvc.perform(
             post("/api/pets")
-                .contentType(MediaType.APPLICATION_JSON)
+                .contentType(
+                    MediaType.APPLICATION_JSON
+                )
                 .content(validPetJson)
         )
-            .andExpect(status().isUnauthorized)
+            .andExpect(
+                status().isUnauthorized
+            )
     }
 
     @WithMockUser(roles = ["CUSTOMER"])
     @Test
     fun `given Customer user when adoptPet then Success`() {
-        given(petService.adoptPet(validPet.id)).willReturn("You successfully adopted ${validPet.name}!")
+        given(
+            petService.adoptPet(validPet.id)
+        ).willReturn("You successfully adopted ${validPet.name}!")
 
         mvc.perform(
             patch("/api/pets/${validPet.id}")
@@ -151,20 +193,26 @@ class SecurityTests {
     @WithMockUser(roles = ["ADMIN"])
     @Test
     fun `given authenticated users with roles except customer when adoptPet then Forbidden`() {
-        given(petService.adoptPet(validPet.id)).willReturn("You successfully adopted ${validPet.name}!")
+        given(
+            petService.adoptPet(validPet.id)
+        ).willReturn("You successfully adopted ${validPet.name}!")
 
         mvc.perform(
-            patch("/api/pets/${validPet.id}"))
+            patch("/api/pets/${validPet.id}")
+        )
             .andExpect(status().isForbidden)
     }
 
     @WithAnonymousUser
     @Test
     fun `given unauthenticated user when adoptPet then Unauthorized`() {
-        given(petService.adoptPet(validPet.id)).willReturn("You successfully adopted ${validPet.name}!")
+        given(
+            petService.adoptPet(validPet.id)
+        ).willReturn("You successfully adopted ${validPet.name}!")
 
         mvc.perform(
-            patch("/api/pets/${validPet.id}"))
+            patch("/api/pets/${validPet.id}")
+        )
             .andExpect(status().isUnauthorized)
     }
 }

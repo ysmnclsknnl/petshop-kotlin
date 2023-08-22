@@ -19,7 +19,7 @@ class PetService(val repo: PetRepository) {
 
         val pet = repo.findById(id).orElseThrow { IllegalArgumentException("Pet with ID: $id doesn't exist") }
 
-        require(!pet.adopted){ "Pet with ID: $id is already adopted" }
+        require(!pet.adopted) { "Pet with ID: $id is already adopted" }
 
         pet.adopted = true
 

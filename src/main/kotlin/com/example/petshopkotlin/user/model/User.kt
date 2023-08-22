@@ -1,7 +1,5 @@
-
 package com.example.petshopkotlin.user.model
 
-import com.example.petshopkotlin.user.model.Role
 import org.bson.types.ObjectId
 import org.springframework.data.mongodb.core.mapping.Document
 import org.springframework.data.mongodb.core.mapping.MongoId

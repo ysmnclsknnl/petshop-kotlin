@@ -52,6 +52,7 @@ class SecurityConfig(val userDetailsService: UserDetailsService) {
         source.registerCorsConfiguration("/**", configuration)
         return source
     }
+
     @Bean
     @Throws(Exception::class)
     fun filterChain(http: HttpSecurity): SecurityFilterChain = http
@@ -75,4 +76,4 @@ class SecurityConfig(val userDetailsService: UserDetailsService) {
         }
         .httpBasic(Customizer.withDefaults())
         .build()
-    }
+}

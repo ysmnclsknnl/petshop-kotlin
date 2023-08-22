@@ -5,6 +5,7 @@ import com.example.petshopkotlin.pet.model.PetType
 import net.datafaker.Faker
 import org.springframework.boot.CommandLineRunner
 import org.springframework.stereotype.Component
+
 @Component
 class PetDataSeeder(val petRepository: PetRepository) : CommandLineRunner {
 
