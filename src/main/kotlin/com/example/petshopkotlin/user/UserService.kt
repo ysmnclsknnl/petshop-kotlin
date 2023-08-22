@@ -1,5 +1,6 @@
 package com.example.petshopkotlin.user
 
+import com.example.petshopkotlin.user.model.Role
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.userdetails.User
@@ -46,12 +47,12 @@ class UserService(
         User(it.username, it.password, listOf(GrantedAuthority { "ROLE_${it.role.name}" }))
     }
 
-    fun login(loginCredentials: LoginDto): String {
+    fun login(loginCredentials: LoginDto): Role {
         val user = userRepo.findUserByUsername(loginCredentials.userName)
             ?: throw UsernameNotFoundException("User with ${loginCredentials.userName} not found!")
 
         return if (BCryptPasswordEncoder().matches(loginCredentials.password, user.password)) {
-            user.userName
+            user.role
         } else {
             throw UsernameNotFoundException("Invalid credentials!")
         }
