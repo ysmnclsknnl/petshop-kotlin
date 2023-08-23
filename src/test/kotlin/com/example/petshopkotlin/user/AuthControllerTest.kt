@@ -122,8 +122,8 @@ class AuthControllerTest {
     @Test
     fun `given valid credentials when login then Success along with username`() {
         val user = User(
-            userName = "fake_user128@example.com",
-            password = "1234567Ab$",
+            userName = "adminuser2@foo.com",
+            password = "12345BCd$",
             role = Role.ADMIN,
         ).also(userRepository::save)
 
@@ -136,7 +136,13 @@ class AuthControllerTest {
             post("/api/auth/login")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(
-                    ObjectMapper().writeValueAsString(loginDto)
+                    """
+                          {
+                        "userName": "adminuser2@foo.com",
+                        "password": "12345BCd$"
+                    }
+                    """.trimIndent()
+
                 )
         )
             .andExpect(
@@ -146,6 +152,6 @@ class AuthControllerTest {
             .response
             .contentAsString
 
-        assertEquals(content, user.username)
+        assertEquals(content, user.role)
     }
 }

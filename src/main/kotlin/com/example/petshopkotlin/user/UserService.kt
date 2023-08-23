@@ -54,7 +54,7 @@ class UserService(
         return if (BCryptPasswordEncoder().matches(loginCredentials.password, user.password)) {
             user.role
         } else {
-            throw UsernameNotFoundException("Invalid credentials!")
+            throw UsernameNotFoundException("Password is not correct!")
         }
     }
 
