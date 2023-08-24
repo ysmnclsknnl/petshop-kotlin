@@ -3,6 +3,7 @@ package com.example.petshopkotlin.pet
 import com.example.petshopkotlin.pet.model.Pet
 import com.example.petshopkotlin.pet.model.PetType
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
@@ -15,7 +16,7 @@ class PetServiceTest {
 
     private val petService by lazy { PetService(petRepository) }
 
-    private val validPet = Pet(
+    private val validDog = Pet(
         name = "Cotton",
         description = "Cute dog. Likes to play fetch",
         age = 3,
@@ -24,54 +25,71 @@ class PetServiceTest {
     )
 
     @Test
-    fun `valid pet should have no validation errors`() {
-        val validationResult = petService.validatePet(validPet)
-        assertEquals("", validationResult)
+    fun `validate shouldn't throw Exception when pet is valid`() {
+        val validationResult = petService.validatePet(validDog)
+        assertEquals(null, validationResult)
     }
 
     @Test
-    fun `pet with name shorter than three characters should have validation error`() {
-        val petWithNameShorterThanThreeCharacters = validPet.copy(name = "A")
+    fun `validatePet should throw Pet Validation Exception when pet has name shorter than three characters `() {
+        val petWithNameShorterThanThreeCharacters = validDog.copy(name = "A")
 
-        val validationResult = petService.validatePet(petWithNameShorterThanThreeCharacters)
-        assertEquals("Name must be at least 3 characters.", validationResult)
+        val exception = assertThrows(
+            PetValidationException::class.java
+        ) {
+            petService.validatePet(petWithNameShorterThanThreeCharacters)?.let { throw it }
+        }
+
+        assertEquals("Name must be at least 3 characters.", exception.message)
     }
 
     @Test
-    fun `pet with description shorter than fifteen characters should have validation error`() {
-        val petWithDescriptionWithLessThanFifteenCharacters = validPet.copy(description = "Abcd")
+    fun `validatePet should throw Pet Validation Exception when  pet has description shorter than fifteen characters `() {
+        val petWithDescriptionWithLessThanFifteenCharacters = validDog.copy(description = "Abcd")
 
-        val validationResult = petService.validatePet(petWithDescriptionWithLessThanFifteenCharacters)
-        assertEquals("Description must be at least 15 characters.", validationResult)
+        val exception = assertThrows(
+            PetValidationException::class.java) {
+            petService.validatePet(petWithDescriptionWithLessThanFifteenCharacters)?.let { throw it }
+        }
+
+        assertEquals("Description must be at least 15 characters.", exception.message)
     }
 
     @Test
-    fun `pet with negative age should have validation error`() {
-        val petWithAgeLessThanZeroYear = validPet.copy(age = -1)
+    fun `validatePet should throw an Pet Validation Exception when pet has negative age `() {
+        val petWithAgeLessThanZeroYear = validDog.copy(age = -1)
+        val exception = assertThrows(PetValidationException::class.java) {
+            petService.validatePet(petWithAgeLessThanZeroYear)?.let { throw it }
+        }
 
-        val validationResult = petService.validatePet(petWithAgeLessThanZeroYear)
-        assertEquals("Age must be at least 0.", validationResult)
+        assertEquals("Age must be at least 0.", exception.message)
     }
 
     @Test
-    fun `pet without image link should have validation error`() {
-        val petWithoutImage = validPet.copy(photoLink = "")
+    fun `validatePet should throw an Pet Validation Exception when pet doesn't have image link`() {
+        val petWithoutImage = validDog.copy(photoLink = "")
+        val exception = assertThrows(PetValidationException::class.java) {
+            petService.validatePet(petWithoutImage)?.let { throw it }
+        }
 
-        val validationResult = petService.validatePet(petWithoutImage)
         assertEquals(
             "Pet must have an image link. Image link should should start with http or https and not contain spaces.",
-            validationResult
+            exception.message
         )
     }
 
     @Test
-    fun `pet without a valid image link should have validation error`() {
-        val petWithInvalidImageLink = validPet.copy(photoLink = "www.invalid.com")
+    fun `validatePet should throw an Pet Validation Exception when pet doesn't have a valid image link`() {
+        val petWithInvalidImageLink = validDog.copy(photoLink = "www.invalid.com")
 
-        val validationResult = petService.validatePet(petWithInvalidImageLink)
+        val exception = assertThrows(
+            PetValidationException::class.java
+        ) {
+            petService.validatePet(petWithInvalidImageLink)?.let { throw it }
+        }
         assertEquals(
             "Image link should should start with http or https and not contain spaces.",
-            validationResult
+            exception.message
         )
     }
 }

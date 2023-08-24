@@ -34,7 +34,7 @@ class SecurityTests {
     @MockBean
     private lateinit var userDetailsService: UserDetailsService
 
-    private val validPet = Pet(
+    private val validCat = Pet(
         name = "Tom",
         description = "Very fast cat. Loves eating fish.",
         age = 2,
@@ -43,18 +43,20 @@ class SecurityTests {
         photoLink = "https://www.foo.com",
     )
 
-    private val pets = listOf(
-        validPet,
-        Pet(
-            name = "Cotton",
-            description = "Cute dog. Likes to play fetch",
-            age = 3,
-            type = PetType.DOG,
-            photoLink = "https://www.hoidog.com"
-        ),
+    private val validDog = Pet(
+        name = "Cotton",
+        description = "Cute dog. Likes to play fetch",
+        age = 3,
+        type = PetType.DOG,
+        photoLink = "https://www.hoidog.com"
     )
 
-    private val validPetJson = validPet.toJson()
+    private val pets = listOf(
+        validCat,
+        validDog
+    )
+
+    private val validPetJson = validCat.toJson()
 
     @WithAnonymousUser
     @Test
@@ -100,7 +102,7 @@ class SecurityTests {
     fun `given Admin user when createPet then Created`() {
         given(
             petService.addPet(any())
-        ).willReturn(validPet)
+        ).willReturn(validCat)
 
         mvc.perform(
             post("/api/pets")
@@ -117,7 +119,7 @@ class SecurityTests {
     @WithMockUser(roles = ["ADMIN"])
     @Test
     fun `given Admin user when createPet then BadRequest`() {
-        val invalidPet = validPet.copy(
+        val invalidPet = validCat.copy(
             age = -1,
         )
 
@@ -144,7 +146,7 @@ class SecurityTests {
     fun `given authenticated users with roles except Admin when createPet then Forbidden`() {
         given(
             petService.addPet(any())
-        ).willReturn(validPet)
+        ).willReturn(validCat)
 
         mvc.perform(
             post("/api/pets")
@@ -163,7 +165,7 @@ class SecurityTests {
     fun `given unauthenticated user when createPet then Unauthorized`() {
         given(
             petService.addPet(any())
-        ).willReturn(validPet)
+        ).willReturn(validCat)
 
         mvc.perform(
             post("/api/pets")
@@ -181,11 +183,11 @@ class SecurityTests {
     @Test
     fun `given Customer user when adoptPet then Success`() {
         given(
-            petService.adoptPet(validPet.id)
-        ).willReturn("You successfully adopted ${validPet.name}!")
+            petService.adoptPet(validCat.id)
+        ).willReturn("You successfully adopted ${validCat.name}!")
 
         mvc.perform(
-            patch("/api/pets/${validPet.id}")
+            patch("/api/pets/${validCat.id}")
         )
             .andExpect(status().isOk)
     }
@@ -194,11 +196,11 @@ class SecurityTests {
     @Test
     fun `given authenticated users with roles except customer when adoptPet then Forbidden`() {
         given(
-            petService.adoptPet(validPet.id)
-        ).willReturn("You successfully adopted ${validPet.name}!")
+            petService.adoptPet(validCat.id)
+        ).willReturn("You successfully adopted ${validCat.name}!")
 
         mvc.perform(
-            patch("/api/pets/${validPet.id}")
+            patch("/api/pets/${validCat.id}")
         )
             .andExpect(status().isForbidden)
     }
@@ -207,11 +209,11 @@ class SecurityTests {
     @Test
     fun `given unauthenticated user when adoptPet then Unauthorized`() {
         given(
-            petService.adoptPet(validPet.id)
-        ).willReturn("You successfully adopted ${validPet.name}!")
+            petService.adoptPet(validCat.id)
+        ).willReturn("You successfully adopted ${validCat.name}!")
 
         mvc.perform(
-            patch("/api/pets/${validPet.id}")
+            patch("/api/pets/${validCat.id}")
         )
             .andExpect(status().isUnauthorized)
     }
