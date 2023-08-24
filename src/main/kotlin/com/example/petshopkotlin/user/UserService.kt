@@ -16,6 +16,10 @@ typealias UserValidationException = IllegalArgumentException
 class UserService(
     @Autowired val userRepo: UserRepository,
 ) : UserDetailsService {
+    override fun loadUserByUsername(userName: String): User? = userRepo.findUserByUsername(userName)?.let {
+        User(it.username, it.password, listOf(GrantedAuthority { "ROLE_${it.role.name}" }))
+    }
+
     fun createUser(user: ModelUser): String {
         require(!userRepo.existsByUserName(user.userName)) { "User with ${user.userName} already exists!" }
         validateUser(user)?.let { throw it }
@@ -31,25 +35,6 @@ class UserService(
         ).username
     }
 
-    internal fun validateUser(user: ModelUser): UserValidationException? {
-
-        val emailRegex = "^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}\$".toRegex()
-        val passwordRegex = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@\$!%*?&])[A-Za-z\\d@\$!%*?&]{8,}$".toRegex()
-
-        val errors = listOfNotNull(
-            user.userName.takeIf { !it.matches(emailRegex) }
-                ?.let { "Email address should consist of numbers, letters, and '.', '-', '_' symbols." },
-            user.password.takeIf { !it.matches(passwordRegex) }
-                ?.let { "Password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one digit, and one special symbol @$!%*?&" }
-        ).joinToString(" ")
-
-        return if (errors.isBlank()) null else IllegalArgumentException(errors)
-    }
-
-    override fun loadUserByUsername(userName: String): User? = userRepo.findUserByUsername(userName)?.let {
-        User(it.username, it.password, listOf(GrantedAuthority { "ROLE_${it.role.name}" }))
-    }
-
     fun login(loginCredentials: LoginDto): Role {
         val user = userRepo.findUserByUsername(loginCredentials.userName)
             ?: throw UsernameNotFoundException("User with ${loginCredentials.userName} not found!")
@@ -60,6 +45,21 @@ class UserService(
             throw UsernameNotFoundException("Password is not correct!")
         }
     }
+}
+
+internal fun validateUser(user: ModelUser): UserValidationException? {
+
+    val emailRegex = "^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}\$".toRegex()
+    val passwordRegex = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@\$!%*?&])[A-Za-z\\d@\$!%*?&]{8,}$".toRegex()
+
+    val errors = listOfNotNull(
+        user.userName.takeIf { !it.matches(emailRegex) }
+            ?.let { "Email address should consist of numbers, letters, and '.', '-', '_' symbols." },
+        user.password.takeIf { !it.matches(passwordRegex) }
+            ?.let { "Password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one digit, and one special symbol @$!%*?&" }
+    ).joinToString(" ")
+
+    return if (errors.isBlank()) null else IllegalArgumentException(errors)
 }
 
 internal fun encryptPassword(password: String) = BCryptPasswordEncoder().encode(password)

@@ -25,7 +25,7 @@ class UserServiceTest {
 
     @Test
     fun `validateUser should return null when user is valid`() {
-        val exception = userService.validateUser(validUser)
+        val exception = validateUser(validUser)
 
         assertEquals(null, exception)
     }
@@ -37,7 +37,7 @@ class UserServiceTest {
         val exception = assertThrows(
             UserValidationException::class.java
         ) {
-            userService.validateUser(userWithInvalidName)?.let { throw it }
+            validateUser(userWithInvalidName)?.let { throw it }
         }
 
         assertEquals(
@@ -53,7 +53,7 @@ class UserServiceTest {
         val exception = assertThrows(
             UserValidationException::class.java
         ) {
-            userService.validateUser(userWithInvalidPassword)?.let { throw it }
+            validateUser(userWithInvalidPassword)?.let { throw it }
         }
 
         assertEquals(
