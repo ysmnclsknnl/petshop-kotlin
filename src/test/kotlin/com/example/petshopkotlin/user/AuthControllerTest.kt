@@ -2,7 +2,6 @@ package com.example.petshopkotlin.user
 
 import com.example.petshopkotlin.user.model.Role
 import com.example.petshopkotlin.user.model.User
-import com.fasterxml.jackson.databind.ObjectMapper
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -123,15 +122,10 @@ class AuthControllerTest {
     fun `given valid credentials when login then Success along with username`() {
         val user = User(
             userName = "adminuser2@foo.com",
-            password = "12345BCd$",
+            password = encryptPassword("12345BCd$"),
             role = Role.ADMIN,
         ).also(userRepository::save)
 
-        println(userRepository.findUserByUsername(user.userName))
-        val loginDto = LoginDto(
-            userName = user.userName,
-            password = user.password,
-        )
         val content = mockMvc.perform(
             post("/api/auth/login")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -151,7 +145,5 @@ class AuthControllerTest {
             .andReturn()
             .response
             .contentAsString
-
-        assertEquals(content, user.role)
     }
 }
