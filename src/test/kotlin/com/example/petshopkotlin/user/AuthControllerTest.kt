@@ -3,6 +3,7 @@ package com.example.petshopkotlin.user
 import com.example.petshopkotlin.user.model.Role
 import com.example.petshopkotlin.user.model.User
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -118,7 +119,7 @@ class AuthControllerTest {
     }
 
     @Test
-    fun `given valid credentials when login then Success along with username`() {
+    fun `given valid credentials when login then Success along with user role`() {
         validAdmin
             .copy(password = encryptPassword(validAdmin.password))
             .also(userRepository::save)
@@ -142,6 +143,59 @@ class AuthControllerTest {
             .andReturn()
             .response
             .contentAsString
+        assertTrue(content.contains(validAdmin.role.name))
+    }
+
+    @Test
+    fun `given not existing userName when login then BadRequest `() {
+        val content = mockMvc.perform(
+            post("/api/auth/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(
+                    """
+                          {
+                        "userName": "${validAdmin.userName}",
+                        "password": "${validAdmin.password}"
+                    }
+                    """.trimIndent()
+
+                )
+        )
+            .andExpect(
+                status().isNotFound
+            )
+            .andReturn()
+            .response
+            .contentAsString
+        assertEquals(content, "User with ${validAdmin.userName} not found!")
+    }
+
+    @Test
+    fun `given existing userName with wrong password when login then BadRequest `() {
+        validAdmin
+            .copy(password = encryptPassword(validAdmin.password))
+            .also(userRepository::save)
+
+        val content = mockMvc.perform(
+            post("/api/auth/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(
+                    """
+                          {
+                        "userName": "${validAdmin.userName}",
+                        "password": "${validAdmin.password + "123"}"
+                    }
+                    """.trimIndent()
+
+                )
+        )
+            .andExpect(
+                status().isNotFound
+            )
+            .andReturn()
+            .response
+            .contentAsString
+        assertEquals(content, "Password is not correct!")
     }
 
     private fun User.toJson(): String {
