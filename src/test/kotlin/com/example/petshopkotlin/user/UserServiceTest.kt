@@ -3,6 +3,7 @@ package com.example.petshopkotlin.user
 import com.example.petshopkotlin.user.model.Role
 import com.example.petshopkotlin.user.model.User
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
@@ -23,33 +24,41 @@ class UserServiceTest {
     )
 
     @Test
-    fun `validateUser should return empty string when user is valid`() {
-        val validationResult = userService.validateUser(validUser)
+    fun `validateUser should return null when user is valid`() {
+        val exception = userService.validateUser(validUser)
 
-        assertEquals("", validationResult)
+        assertEquals(null, exception)
     }
 
     @Test
-    fun `validateUser should return an error message when username is invalid`() {
+    fun `validateUser should throw User Validation Exception when username is invalid`() {
         val userWithInvalidName = validUser.copy(userName = "foo")
 
-        val validationResult = userService.validateUser(userWithInvalidName)
+        val exception = assertThrows(
+            UserValidationException::class.java
+        ) {
+            userService.validateUser(userWithInvalidName)?.let { throw it }
+        }
 
         assertEquals(
             "Email address should consist of numbers, letters, and '.', '-', '_' symbols.",
-            validationResult
+            exception.message
         )
     }
 
     @Test
-    fun `validateUser should return an error message when password is invalid`() {
+    fun `validateUser should throw User Validation Exception when password is invalid`() {
         val userWithInvalidPassword = validUser.copy(password = "1234567")
 
-        val validationResult = userService.validateUser(userWithInvalidPassword)
+        val exception = assertThrows(
+            UserValidationException::class.java
+        ) {
+            userService.validateUser(userWithInvalidPassword)?.let { throw it }
+        }
 
         assertEquals(
             "Password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one digit, and one special symbol @$!%*?&",
-            validationResult
+            exception.message
         )
     }
 }
