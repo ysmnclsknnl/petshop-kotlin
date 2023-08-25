@@ -1,0 +1,8 @@
+spring:
+  data:
+    mongodb:
+      host: localhost
+      port: ${mongodb.container.port}
+      database: PetShop_TEST
+      auto-index-creation: true
+
