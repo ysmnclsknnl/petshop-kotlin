@@ -30,7 +30,7 @@ class PetService(val repo: PetRepository) {
     }
 }
 
-internal fun validatePet(pet: Pet): IllegalArgumentException? = listOfNotNull(
+internal fun validatePet(pet: Pet): PetValidationException? = listOfNotNull(
         if (pet.name.length >= 3) null else "Name must be at least 3 characters.",
         if (pet.description.length >= 15) null else "Description must be at least 15 characters.",
         if (pet.age >= 0) null else "Age must be at least 0.",
