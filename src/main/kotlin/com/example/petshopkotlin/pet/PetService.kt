@@ -12,6 +12,7 @@ class PetService(val repo: PetRepository) {
 
     fun addPet(pet: Pet): Pet {
         validatePet(pet)?.let { throw it }
+
         return repo.save(pet)
     }
 
@@ -29,15 +30,14 @@ class PetService(val repo: PetRepository) {
     }
 }
 
-internal fun validatePet(pet: Pet): PetValidationException? {
-    val errors = listOfNotNull(
-        if (pet.name.length < 3) "Name must be at least 3 characters." else null,
+internal fun validatePet(pet: Pet): IllegalArgumentException? = listOfNotNull(
+        if (pet.name.length >= 3) null else "Name must be at least 3 characters.",
         if (pet.description.length >= 15) null else "Description must be at least 15 characters.",
         if (pet.age >= 0) null else "Age must be at least 0.",
         if (pet.photoLink.isNotBlank()) null else "Pet must have an image link.",
         if (pet.photoLink.matches(Regex("^(http|https)://[^ \"]+\$"))) null
         else "Image link should should start with http or https and not contain spaces.",
-    ).joinToString(" ")
-
-    return if (errors.isBlank()) null else PetValidationException(errors)
+    ).let { errors ->
+        if (errors.isEmpty()) null
+        else PetValidationException(errors.joinToString(" "))
 }
