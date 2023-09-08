@@ -26,7 +26,7 @@ class PetServiceTest {
 
     @Test
     fun `validate shouldn't throw Exception when pet is valid`() {
-        val validationResult = validatePet(validDog)
+        val validationResult = validDog.getValidationExceptions()
         assertEquals(null, validationResult)
     }
 
@@ -37,7 +37,7 @@ class PetServiceTest {
         val exception = assertThrows(
             PetValidationException::class.java
         ) {
-            validatePet(petWithNameShorterThanThreeCharacters)?.let { throw it }
+         petWithNameShorterThanThreeCharacters.getValidationExceptions()?.let { throw it }
         }
 
         assertEquals("Name must be at least 3 characters.", exception.message)
@@ -49,7 +49,7 @@ class PetServiceTest {
 
         val exception = assertThrows(
             PetValidationException::class.java) {
-            validatePet(petWithDescriptionWithLessThanFifteenCharacters)?.let { throw it }
+            petWithDescriptionWithLessThanFifteenCharacters.getValidationExceptions()?.let { throw it }
         }
 
         assertEquals("Description must be at least 15 characters.", exception.message)
@@ -59,7 +59,7 @@ class PetServiceTest {
     fun `validatePet should throw an Pet Validation Exception when pet has negative age `() {
         val petWithAgeLessThanZeroYear = validDog.copy(age = -1)
         val exception = assertThrows(PetValidationException::class.java) {
-            validatePet(petWithAgeLessThanZeroYear)?.let { throw it }
+            petWithAgeLessThanZeroYear.getValidationExceptions()?.let { throw it }
         }
 
         assertEquals("Age must be at least 0.", exception.message)
@@ -69,7 +69,7 @@ class PetServiceTest {
     fun `validatePet should throw an Pet Validation Exception when pet doesn't have image link`() {
         val petWithoutImage = validDog.copy(photoLink = "")
         val exception = assertThrows(PetValidationException::class.java) {
-            validatePet(petWithoutImage)?.let { throw it }
+            petWithoutImage.getValidationExceptions()?.let { throw it }
         }
 
         assertEquals(
@@ -85,7 +85,7 @@ class PetServiceTest {
         val exception = assertThrows(
             PetValidationException::class.java
         ) {
-            validatePet(petWithInvalidImageLink)?.let { throw it }
+            petWithInvalidImageLink.getValidationExceptions()?.let { throw it }
         }
         assertEquals(
             "Image link should should start with http or https and not contain spaces.",
