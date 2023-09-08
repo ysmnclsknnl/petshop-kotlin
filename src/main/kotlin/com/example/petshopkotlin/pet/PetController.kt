@@ -1,5 +1,6 @@
 package com.example.petshopkotlin.pet
 
+import com.example.petshopkotlin.pet.model.CreatePetDTO
 import com.example.petshopkotlin.pet.model.Pet
 import jakarta.annotation.security.RolesAllowed
 import org.bson.types.ObjectId
@@ -22,7 +23,7 @@ class PetController(val petService: PetService) {
 
     @RolesAllowed("ROLE_ADMIN")
     @PostMapping
-    fun createPet(@RequestBody pet: Pet): ResponseEntity<Pet> =
+    fun createPet(@RequestBody pet: CreatePetDTO): ResponseEntity<Pet> =
         ResponseEntity
             .status(HttpStatus.CREATED)
             .body(petService.addPet(pet))

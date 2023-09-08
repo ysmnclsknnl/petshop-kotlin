@@ -1,5 +1,6 @@
 package com.example.petshopkotlin.pet
 
+import com.example.petshopkotlin.pet.model.CreatePetDTO
 import com.example.petshopkotlin.pet.model.Pet
 import com.example.petshopkotlin.pet.model.PetType
 import com.example.petshopkotlin.security.SecurityConfig
@@ -34,16 +35,17 @@ class SecurityTests {
     @MockBean
     private lateinit var userDetailsService: UserDetailsService
 
-    private val validCat = Pet(
+    private val validCatDTO = CreatePetDTO(
         name = "Tom",
         description = "Very fast cat. Loves eating fish.",
         age = 2,
         type = PetType.CAT,
-        adopted = true,
         photoLink = "https://www.foo.com",
     )
 
-    private val validDog = Pet(
+    private val validCat = validCatDTO.toPet()
+
+    private val validDogDTO = CreatePetDTO(
         name = "Cotton",
         description = "Cute dog. Likes to play fetch",
         age = 3,
@@ -51,12 +53,14 @@ class SecurityTests {
         photoLink = "https://www.hoidog.com"
     )
 
+    private val validDog = validDogDTO.toPet()
+
     private val pets = listOf(
         validCat,
         validDog
     )
 
-    private val validPetJson = validCat.toJson()
+    private val validPetJson = validCatDTO.toJson()
 
     @WithAnonymousUser
     @Test
@@ -119,7 +123,7 @@ class SecurityTests {
     @WithMockUser(roles = ["ADMIN"])
     @Test
     fun `given Admin user when createPet then BadRequest`() {
-        val invalidPet = validCat.copy(
+        val invalidPet = validCatDTO.copy(
             age = -1,
         )
 
@@ -219,4 +223,4 @@ class SecurityTests {
     }
 }
 
-internal fun Pet.toJson(): String = ObjectMapper().writeValueAsString(this)
+internal fun CreatePetDTO.toJson(): String = ObjectMapper().writeValueAsString(this)

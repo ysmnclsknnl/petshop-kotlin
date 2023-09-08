@@ -11,10 +11,10 @@ data class Pet(
     @Id
     @JsonSerialize(using = ObjectIdSerializer::class)
     val id: ObjectId = ObjectId(),
-    var name: String,
-    var description: String,
-    var age: Int,
-    var type: PetType,
+    val name: String,
+    val description: String,
+    val age: Int,
+    val type: PetType,
     var adopted: Boolean = false,
-    var photoLink: String,
-)
+    val photoLink: String,
+    )

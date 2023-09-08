@@ -1,7 +1,7 @@
 package com.example.petshopkotlin.pet
 
 import com.example.petshopkotlin.SecurityOff
-import com.example.petshopkotlin.pet.model.Pet
+import com.example.petshopkotlin.pet.model.CreatePetDTO
 import com.example.petshopkotlin.pet.model.PetType
 import org.bson.types.ObjectId
 import org.hamcrest.Matchers
@@ -22,7 +22,7 @@ import org.testcontainers.junit.jupiter.Testcontainers
 @AutoConfigureMockMvc
 @Testcontainers
 @ImportAutoConfiguration(SecurityOff::class)
-class PetControllerTest {
+class PetControllerIntTest {
     @Autowired
     lateinit var mockMvc: MockMvc
 
@@ -34,22 +34,25 @@ class PetControllerTest {
         petRepository.deleteAll()
     }
 
-    private val validCat = Pet(
+    private val validCatDTO = CreatePetDTO(
         name = "Tom",
         description = "Very fast cat. Loves eating fish.",
         age = 2,
         type = PetType.CAT,
-        adopted = false,
         photoLink = "https://www.foo.com",
     )
 
-    private val validDog = Pet(
+    private val validCat = validCatDTO.toPet()
+
+    private val validDogDTO = CreatePetDTO(
         name = "Cotton",
         description = "Cute dog. Likes to play fetch",
         age = 3,
         type = PetType.DOG,
         photoLink = "https://www.hoidog.com"
     )
+
+private val validDog = validDogDTO.toPet()
 
     @Test
     fun getPets() {
@@ -102,7 +105,7 @@ class PetControllerTest {
             post("/api/pets")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(
-                    validCat.toJson()
+                    validCatDTO.toJson()
                 )
         )
             .andExpect(
@@ -137,7 +140,7 @@ class PetControllerTest {
 
     @Test
     fun `createPet should return status BadRequest when pet is invalid `() {
-        val invalidDog = Pet(
+        val invalidDog = CreatePetDTO(
             name = "As",
             description = "Lovely !",
             age = -1,

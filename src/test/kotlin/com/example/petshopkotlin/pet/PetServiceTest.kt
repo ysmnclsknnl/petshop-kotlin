@@ -1,6 +1,6 @@
 package com.example.petshopkotlin.pet
 
-import com.example.petshopkotlin.pet.model.Pet
+import com.example.petshopkotlin.pet.model.CreatePetDTO
 import com.example.petshopkotlin.pet.model.PetType
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertThrows
@@ -16,7 +16,7 @@ class PetServiceTest {
 
     private val petService by lazy { PetService(petRepository) }
 
-    private val validDog = Pet(
+    private val validDog = CreatePetDTO(
         name = "Cotton",
         description = "Cute dog. Likes to play fetch",
         age = 3,
